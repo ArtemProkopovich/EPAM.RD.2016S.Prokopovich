@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStorage", "UserStorage\UserStorage.csproj", "{7C6E863A-AF22-4135-881D-1CCF504385BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStorageTest", "UserStorageTest\UserStorageTest.csproj", "{B1A3E94B-40D6-4E36-ADB7-297F74855108}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C6E863A-AF22-4135-881D-1CCF504385BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C6E863A-AF22-4135-881D-1CCF504385BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C6E863A-AF22-4135-881D-1CCF504385BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C6E863A-AF22-4135-881D-1CCF504385BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1A3E94B-40D6-4E36-ADB7-297F74855108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1A3E94B-40D6-4E36-ADB7-297F74855108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1A3E94B-40D6-4E36-ADB7-297F74855108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A3E94B-40D6-4E36-ADB7-297F74855108}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
