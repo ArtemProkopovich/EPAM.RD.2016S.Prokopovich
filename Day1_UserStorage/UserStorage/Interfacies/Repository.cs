@@ -72,5 +72,7 @@ namespace UserStorage.Interfacies
                 i++;
             }
         }
+
+        public abstract IEnumerable<int> SearchAll(params Func<T, bool>[] criterias);
     }
 }

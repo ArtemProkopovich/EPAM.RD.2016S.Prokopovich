@@ -14,6 +14,7 @@ namespace UserStorage.Interfacies
         T GetById(int id);
         IEnumerable<T> GetAll();
         IEnumerable<int> SearchAll(Func<T, bool> criteria);
+        IEnumerable<int> SearchAll(params Func<T, bool>[] criterias);
         int SearchFirst(Func<T, bool> criteria);
         void Delete(User user);
     }

@@ -41,6 +41,16 @@ namespace UserStorage
             return userList.FirstOrDefault(e => e.PersonalId == id);
         }
 
+        public override IEnumerable<int> SearchAll(params Func<User, bool>[] criterias)
+        {
+            IEnumerable<int> result = new List<int>();
+            foreach(var func in criterias)
+            {
+                result = result.Union(SearchAll(func));
+            }
+            return result;
+        }
+
         public override IEnumerable<int> SearchAll(Func<User, bool> criteria)
         {
             return userList.Where(criteria).Select(e => e.PersonalId);

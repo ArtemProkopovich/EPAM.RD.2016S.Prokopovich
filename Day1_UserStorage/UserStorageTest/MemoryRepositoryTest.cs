@@ -137,7 +137,7 @@ namespace UserStorageTest
         }
 
         [TestMethod]
-        public void SearchAll_AddTwoElementsWithLastNameEqualName_SearchThisElements_ReturnIenumerableWithTwoElements()
+        public void SearchAll_AddTwoElementsWithLastNameEqualName_SearchThisElements_ReturnIEnumerableWithTwoElements()
         {
             //arrange
             List<User> users = new List<User> {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
@@ -153,6 +153,25 @@ namespace UserStorageTest
             //assert
             users.RemoveAt(0);
             CollectionAssert.AreEqual(result.ToArray(), users.Select(e=>e.PersonalId).ToArray());
+        }
+
+        [TestMethod]
+        public void SearchAll_AddThreeElements_SearchTwoOfThemByDifferentCriterias_ReturnCorrectSequence()
+        {
+            //arrange
+            List<User> users = new List<User> {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
+            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
+            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            MemoryRepository rep = new MemoryRepository();
+            foreach (var u in users)
+            {
+                rep.Add(u);
+            }
+            //act
+            var result = rep.SearchAll(e => e.PersonalId == 1, e => e.PersonalId == 2);
+            //assert
+            users.RemoveAt(2);
+            CollectionAssert.AreEqual(result.ToArray(), users.Select(e => e.PersonalId).ToArray());
         }
 
         [TestMethod]
