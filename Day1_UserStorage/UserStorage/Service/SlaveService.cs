@@ -57,7 +57,7 @@ namespace UserStorage.Service
         {
             if (isLogged)
                 logger.Info("message");
-            userRepository.Add(args.data);
+            userRepository.Delete(args.data);
         }
 
         public void Save()
