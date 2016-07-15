@@ -52,15 +52,24 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ConfiguratorTest.cs" />
     <Compile Include="MemoryRepositoryTest.cs" />
     <Compile Include="UserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlRepositoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UserStorageConfiguration\UserStorageConfiguration.csproj">
+      <Project>{d995dad8-a152-40e5-955a-bc96da58d3e4}</Project>
+      <Name>UserStorageConfiguration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UserStorage\UserStorage.csproj">
       <Project>{7c6e863a-af22-4135-881d-1ccf504385bf}</Project>
       <Name>UserStorage</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

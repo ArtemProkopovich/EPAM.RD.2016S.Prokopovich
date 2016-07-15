@@ -8,7 +8,8 @@ namespace UserStorage.Entity
 {
     public class User: IEquatable<User>, IComparable<User>, ICloneable
     {
-        public int PersonalId { get; set; }
+        public int Id { get; set; }
+        public string PersonalId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime? BirthDate { get; set; }
@@ -79,6 +80,7 @@ namespace UserStorage.Entity
         {
             return new User()
             {
+                Id = Id,
                 PersonalId = PersonalId,
                 FirstName = FirstName,
                 LastName = LastName,

@@ -7,15 +7,16 @@ using UserStorage.Entity;
 
 namespace UserStorage.Interfacies
 {
-    public interface IRepository<T>
+    public interface IRepository<T> : ICloneable
     {
         bool IsValid(T model);
         int Add(T item);
         T GetById(int id);
         IEnumerable<T> GetAll();
-        IEnumerable<int> SearchAll(Func<T, bool> criteria);
-        IEnumerable<int> SearchAll(params Func<T, bool>[] criterias);
-        int SearchFirst(Func<T, bool> criteria);
-        void Delete(User user);
+        IEnumerable<T> SearchAll(Func<T, bool> criteria);
+        IEnumerable<T> SearchAll(params Func<T, bool>[] criterias);
+        T SearchFirst(Func<T, bool> criteria);
+        void Delete(T user);
+        void Save();
     }
 }

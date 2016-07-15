@@ -9,27 +9,28 @@ namespace UserStorage.Interfacies
 {
     public abstract class Repository<T>: IRepository<T>
     {
-        private readonly Func<T, bool> validationDelegate = (x) => { return true; };
-        protected IEnumerator<int> idSequence;
+        protected readonly Func<T, bool>[] validationFuncs = new Func<T, bool>[] { (x) => { return true; } };
+        protected readonly IEnumerable<int> idSequence;
+        protected readonly IEnumerator<int> idEnumerator;
 
         public Repository()
         {
-            idSequence = DefaultIdSequence().GetEnumerator();
+            idSequence = DefaultIdSequence();
+            idEnumerator = idSequence.GetEnumerator();
         }
 
         public Repository(IEnumerable<int> idSequence) : this()
         {
             if (idSequence != null)
-                this.idSequence = idSequence.GetEnumerator();
+            {
+                this.idSequence = idSequence;
+                idEnumerator = this.idSequence.GetEnumerator();
+            }
         }
 
         public Repository(IEnumerable<int> idSequence, params Func<T, bool>[] validationFuncs) : this(idSequence)
         {
-            foreach (var func in validationFuncs)
-                if (func != null)
-                    validationDelegate += func;
-                else
-                    throw new ArgumentNullException(nameof(func));
+            this.validationFuncs = validationFuncs;
         }
 
         public int Add(T item)
@@ -41,7 +42,10 @@ namespace UserStorage.Interfacies
             throw new InvalidArgumentException("The model is not valid.", nameof(item));
         }
 
-        public abstract void Delete(User user);
+        public abstract IEnumerable<T> SearchAll(Func<T, bool> criteria);
+        public abstract IEnumerable<T> SearchAll(params Func<T, bool>[] criterias);
+        public abstract T SearchFirst(Func<T, bool> criteria);
+        public abstract void Delete(T user);
 
         public abstract IEnumerable<T> GetAll();
 
@@ -49,17 +53,8 @@ namespace UserStorage.Interfacies
 
         public bool IsValid(T model)
         {
-            foreach(var func in validationDelegate.GetInvocationList())
-            {
-                if (!(bool)func.DynamicInvoke(model))
-                    return false;
-            }
-            return true;
+            return validationFuncs.All(e => e(model));
         }
-
-        public abstract IEnumerable<int> SearchAll(Func<T, bool> criteria);
-
-        public abstract int SearchFirst(Func<T, bool> criteria);
 
         protected abstract int AddItem(T item);
 
@@ -73,6 +68,13 @@ namespace UserStorage.Interfacies
             }
         }
 
-        public abstract IEnumerable<int> SearchAll(params Func<T, bool>[] criterias);
+        public abstract Repository<T> Clone();
+
+        object ICloneable.Clone()
+        {
+            return Clone();
+        }
+
+        public abstract void Save();
     }
 }

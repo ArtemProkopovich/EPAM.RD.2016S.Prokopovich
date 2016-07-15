@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UserStorage.Interfacies;
 using UserStorage.Entity;
-using UserStorage;
+using UserStorage.Repository;
 
 namespace UserStorageTest
 {
@@ -86,9 +86,9 @@ namespace UserStorageTest
         public void GetAll_AddThreeElementsInStorage_ReturnIEnumerableWithThreeElements()
         {
             //arrange
-            User[] users = new User[] {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name2" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name3" }};
+            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name2" }
+            ,new User() {Id=3, FirstName = null, LastName = "name3" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
@@ -104,9 +104,9 @@ namespace UserStorageTest
         public void SearchFirst_AddTwoElementsWithLastNameEqualName_SearchThisElements_ReturnTwo()
         {
             //arrange
-            User[] users = new User[] {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
@@ -115,16 +115,16 @@ namespace UserStorageTest
             }
             var result = rep.SearchFirst(e => e.LastName == "name");
             //assert
-            Assert.AreEqual(result, 2);
+            Assert.AreEqual(result, users[1]);
         }
 
         [TestMethod]
         public void SearchFirst_AddTwoElements_SearchElementNotExistsInStorage_ReturnZero()
         {
             //arrange
-            User[] users = new User[] {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
@@ -133,16 +133,16 @@ namespace UserStorageTest
             }
             var result = rep.SearchFirst(e => e.LastName == "name2");
             //assert
-            Assert.AreEqual(result, 0);
+            Assert.AreEqual(result, null);
         }
 
         [TestMethod]
         public void SearchAll_AddTwoElementsWithLastNameEqualName_SearchThisElements_ReturnIEnumerableWithTwoElements()
         {
             //arrange
-            List<User> users = new List<User> {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            List<User> users = new List<User> {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
@@ -152,35 +152,35 @@ namespace UserStorageTest
             var result = rep.SearchAll(e => e.LastName == "name");
             //assert
             users.RemoveAt(0);
-            CollectionAssert.AreEqual(result.ToArray(), users.Select(e=>e.PersonalId).ToArray());
+            CollectionAssert.AreEqual(result.ToArray(), users.ToArray());
         }
 
         [TestMethod]
         public void SearchAll_AddThreeElements_SearchTwoOfThemByDifferentCriterias_ReturnCorrectSequence()
         {
             //arrange
-            List<User> users = new List<User> {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            List<User> users = new List<User> {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             foreach (var u in users)
             {
                 rep.Add(u);
             }
             //act
-            var result = rep.SearchAll(e => e.PersonalId == 1, e => e.PersonalId == 2);
+            var result = rep.SearchAll(e => e.Id == 1, e => e.Id == 2);
             //assert
             users.RemoveAt(2);
-            CollectionAssert.AreEqual(result.ToArray(), users.Select(e => e.PersonalId).ToArray());
+            CollectionAssert.AreEqual(result.ToArray(), users.ToArray());
         }
 
         [TestMethod]
         public void SearchAll_AddTwoElements_SearchElementsNotExistsInStorage_ReturnIenumerableWithZeroElements()
         {
             //arrange
-            List<User> users = new List<User> {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            List<User> users = new List<User> {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
@@ -197,9 +197,9 @@ namespace UserStorageTest
         public void GetById_AddThreeElementsInStorage_GetElementWithIdEqualTwo_ReturnEqualElement()
         {
             //arrange
-            User[] users = new User[] {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
@@ -215,9 +215,9 @@ namespace UserStorageTest
         public void GetById_AddThreeElementsInStorage_IdParamNotExistsInStorage_ReturnNull()
         {
             //arrange
-            User[] users = new User[] {new User() {PersonalId=1, FirstName = null, LastName = "name1" }
-            ,new User() {PersonalId=2, FirstName = null, LastName = "name" }
-            ,new User() {PersonalId=3, FirstName = null, LastName = "name" }};
+            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
+            ,new User() {Id=2, FirstName = null, LastName = "name" }
+            ,new User() {Id=3, FirstName = null, LastName = "name" }};
             MemoryRepository rep = new MemoryRepository();
             //act
             foreach (var u in users)
