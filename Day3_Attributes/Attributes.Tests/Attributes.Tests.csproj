@@ -55,7 +55,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\Artsiom_Prakapovich\Downloads\dotnetcore-master %281%29\dotnetcore-master\Day3\Attributes\Attributes.csproj">
+    <ProjectReference Include="..\Attributes\Attributes.csproj">
       <Project>{a7b17235-c276-40df-9284-2f18d312e62f}</Project>
       <Name>Attributes</Name>
     </ProjectReference>
