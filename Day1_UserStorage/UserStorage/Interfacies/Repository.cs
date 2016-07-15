@@ -60,11 +60,16 @@ namespace UserStorage.Interfacies
 
         protected virtual IEnumerable<int> DefaultIdSequence()
         {
-            int i = 1;
-            while (i < int.MaxValue)
+            int prev = 1;
+            int current = 1;
+            while (true)
             {
-                yield return i;
-                i++;
+                yield return current;
+                if (int.MaxValue - current < prev)
+                    break;
+                int temp = current + prev;
+                prev = current;
+                current = temp;
             }
         }
 
