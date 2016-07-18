@@ -28,14 +28,16 @@ namespace ConsoleApplication1
         public virtual void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
+        //Wtf this task.
         private void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
             if (disposing)
-                _resource = null;
+                _resource.Dispose();
             _buffer = IntPtr.Zero;
             _disposed = true;
         }
