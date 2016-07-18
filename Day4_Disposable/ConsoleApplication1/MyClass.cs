@@ -32,11 +32,18 @@ namespace ConsoleApplication1
 
         private void Dispose(bool disposing)
         {
-            // TODO: Add your implementations here.
+            if (_disposed)
+                return;
+            if (disposing)
+                _resource = null;
+            _buffer = IntPtr.Zero;
+            _disposed = true;
         }
 
         public void DoSomething()
         {
+            if (_resource.IsInvalid)
+                throw new ObjectDisposedException(nameof(_resource));
             // NOTE: Manupulation with _buffer and _resource in this line.
         }
     }
