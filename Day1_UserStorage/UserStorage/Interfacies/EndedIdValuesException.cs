@@ -10,6 +10,11 @@ namespace UserStorage.Interfacies
     [Serializable]
     public class EndedIdValuesException : Exception
     {
+
+        public EndedIdValuesException()
+        {
+        }
+
         public EndedIdValuesException(SerializationInfo info, StreamingContext context)
         {
 

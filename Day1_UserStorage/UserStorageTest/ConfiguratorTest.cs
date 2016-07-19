@@ -33,12 +33,11 @@ namespace UserStorageTest
             ServiceKeeper srv = conf.Initialize();
         }
 
-
         [TestMethod]
         public void InitializeWithDomens_InConfigFileOneMasterFiveSlaves_ReturnServiceKeeperWithMasterAndFiveSlaves_Test()
         {
             Configurator conf = new Configurator();
-            ServiceKeeper srv = conf.InitializeWithDomens();
+            var srv = conf.InitializeWithDomens();
             Assert.IsNotNull(srv.Master);
             Assert.AreEqual(srv.Slaves.Count(), 5);
         }

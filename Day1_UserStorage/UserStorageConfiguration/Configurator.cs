@@ -67,10 +67,10 @@ namespace UserStorageConfiguration
             {
                 throw ex;
             }
-            //catch (Exception ex)
-            //{
-            //    throw new ConfigurationException();
-            //}
+            catch (Exception ex)
+            {
+                throw new ConfigurationException();
+            }
         }
 
         private MasterService InitMasterServiceInDomain(IRepository<User> rep)

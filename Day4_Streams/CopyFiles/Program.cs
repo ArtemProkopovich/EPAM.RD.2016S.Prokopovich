@@ -132,8 +132,8 @@ namespace FileStreams
                 {
                     bytesRead = stringReader.ReadBlock(buffer, 0, buffer.Length); // TODO: Read block from stringReader to buffer.
                     streamWriter.Write(buffer); // TODO: Write buffer to streamWriter.
-                    var memBuffer = memoryStream.GetBuffer();
-                    destinStream.Write(memBuffer, 0, memBuffer.Length);
+                    streamWriter.Flush();
+                    destinStream.Write(memoryStream.GetBuffer(), 0, bytesRead);
                     memoryStream.Seek(0, SeekOrigin.Begin);
                     // TODO: After implementing everythin check the content of NewTextFile. What's wrong with it, and how this may be fixed?
                     // TODO: write memoryStream.GetBuffer() content to destination stream.
