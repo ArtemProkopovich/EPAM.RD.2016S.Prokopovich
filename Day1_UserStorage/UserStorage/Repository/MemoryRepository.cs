@@ -8,6 +8,7 @@ using UserStorage.Entity;
 
 namespace UserStorage.Repository
 {
+    [Serializable]
     public class MemoryRepository : Repository<User>
     {
         private readonly List<User> userList = new List<User>();
@@ -76,12 +77,12 @@ namespace UserStorage.Repository
             {
                 result = result.Union(SearchAll(func));
             }
-            return result;
+            return result.ToList();
         }
 
         public override IEnumerable<User> SearchAll(Func<User, bool> criteria)
         {
-            return userList.Where(criteria);
+            return userList.Where(criteria).ToList();
         }
 
         public override User SearchFirst(Func<User, bool> criteria)

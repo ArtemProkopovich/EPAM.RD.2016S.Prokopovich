@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserStorage.Entity
 {
+    [Serializable]
     public enum Gender
     {
         Male, Female

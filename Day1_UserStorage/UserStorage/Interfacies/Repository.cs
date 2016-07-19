@@ -7,15 +7,16 @@ using UserStorage.Entity;
 
 namespace UserStorage.Interfacies
 {
+    [Serializable]
     public abstract class Repository<T>: IRepository<T>
     {
-        protected readonly Func<T, bool>[] validationFuncs = new Func<T, bool>[] { (x) => { return true; } };
-        protected readonly IEnumerable<int> idSequence;
-        protected readonly IEnumerator<int> idEnumerator;
+        public Func<T, bool>[] validationFuncs { get; private set; } = new Func<T, bool>[] { (x) => { return true; } };
+        public IEnumerable<int> idSequence { get; private set; }
+        public IEnumerator<int> idEnumerator { get; private set; }
 
         public Repository()
         {
-            idSequence = DefaultIdSequence();
+            idSequence = DefaultIdSequence().ToList();
             idEnumerator = idSequence.GetEnumerator();
         }
 

@@ -49,6 +49,7 @@
     <Compile Include="Configuration\ServiceConfiguration\ServiceCollection.cs" />
     <Compile Include="Configuration\ServiceConfiguration\ServiceConfig.cs" />
     <Compile Include="Configurator.cs" />
+    <Compile Include="DomainAssemblyLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceKeeper.cs" />
   </ItemGroup>

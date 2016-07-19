@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserStorage.Entity
 {
+    [Serializable]
     public class User: IEquatable<User>, IComparable<User>, ICloneable
     {
         public int Id { get; set; }

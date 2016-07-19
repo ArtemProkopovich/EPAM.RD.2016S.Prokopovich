@@ -44,11 +44,10 @@ namespace DoSomethingClient
             // TODO: Create a domain with name MyDomain.
             AppDomain domain = AppDomain.CreateDomain("MyDomain");
             var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
-            var loader1 = new DomainAssemblyLoader();
             try
             {
                 var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"MyDomain\MyLibrary.dll");
-                Result result = loader1.LoadFile(path, input); // TODO: Use loader here.
+                Result result = loader.LoadFile(path, input); // TODO: Use loader here.
 
                 Console.WriteLine("Method1: {0}", result.Value);
             }
@@ -71,7 +70,6 @@ namespace DoSomethingClient
             // TODO: Create a domain with name MyDomain and setup from appDomainSetup.
             AppDomain domain = AppDomain.CreateDomain("MyDomain", security, appDomainSetup);
             var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
-            //DomainAssemblyLoader loader1 = new DomainAssemblyLoader();
             try
             {
                 var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"MyDomain\MyLibrary.dll");

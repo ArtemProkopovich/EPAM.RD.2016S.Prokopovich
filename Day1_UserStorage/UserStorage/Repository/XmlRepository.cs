@@ -10,10 +10,11 @@ using System.IO;
 
 namespace UserStorage.Repository
 {
+    [Serializable]
     public class XmlRepository : Repository<User>
     {
-        private readonly MemoryRepository repository;
-        private readonly string filePath;
+        public MemoryRepository repository { get; private set; }
+        public string filePath { get; private set; }
 
         public XmlRepository(string filePath)
         {

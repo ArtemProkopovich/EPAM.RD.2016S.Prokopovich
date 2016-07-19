@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserStorage.Repository
 {
+    [Serializable]
     public class RepositoryException : Exception
     {
     }

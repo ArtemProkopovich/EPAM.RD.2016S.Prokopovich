@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Reflection;
 using UserStorageConfiguration.Configuration.FileConfiguration;
 using UserStorageConfiguration.Configuration.ServiceConfiguration;
 using UserStorage.Service;
@@ -44,6 +46,70 @@ namespace UserStorageConfiguration
                 throw new ConfigurationException();
             }
         }
+
+        public ServiceKeeper InitializeWithDomens()
+        {
+            try
+            {
+                if (ValidateConfig())
+                {
+                    string filePath = GetFilePathFromConfig();
+                    var masterConf = GetMasterServiceConfig();
+                    var masterRep = GetMasterRepository(masterConf, filePath);
+                    var master = InitMasterServiceInDomain(masterRep);
+                    var slaves = InitSlaveServicesInDomains(master, masterRep);
+                    return new ServiceKeeper(master, slaves);
+                }
+                else
+                    throw new ConfigurationException();
+            }
+            catch (ConfigurationException ex)
+            {
+                throw ex;
+            }
+            //catch (Exception ex)
+            //{
+            //    throw new ConfigurationException();
+            //}
+        }
+
+        private MasterService InitMasterServiceInDomain(IRepository<User> rep)
+        {
+            AppDomain domain = AppDomain.CreateDomain("MasterDomain");
+            var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"UserStorage.dll");
+            var instance = loader.LoadFrom(path, typeof(MasterService), rep);
+            return (MasterService)instance;
+        }
+
+        private IEnumerable<SlaveService> InitSlaveServicesInDomains(MasterService master, IRepository<User> rep)
+        {
+            int domainNumber = 1;
+            var serviceConfig = ServiceConfig.GetConfig();
+            List<SlaveService> result = new List<SlaveService>();
+            foreach (var service in serviceConfig.Services)
+            {
+                var s = (Service)service;
+                if (s.Type == "slave")
+                {
+                    int count = int.Parse(s.Count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        string domainName = "SlaveDomain" + domainNumber;
+                        AppDomain domain = AppDomain.CreateDomain(domainName);
+                        var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
+                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserStorage.dll");
+                        var slave = (SlaveService)loader.LoadFrom(path, typeof(SlaveService), rep);
+                        master.Added += slave.OnAdded;
+                        master.Deleted += slave.OnDeleted;
+                        result.Add(slave);
+                        domainNumber++;
+                    }
+                }
+            }
+            return result;
+        }
+
         private bool ValidateConfig()
         {
             var serviceConfig = ServiceConfig.GetConfig();

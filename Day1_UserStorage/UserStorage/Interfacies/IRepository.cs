@@ -7,6 +7,7 @@ using UserStorage.Entity;
 
 namespace UserStorage.Interfacies
 {
+
     public interface IRepository<T> : ICloneable
     {
         bool IsValid(T model);

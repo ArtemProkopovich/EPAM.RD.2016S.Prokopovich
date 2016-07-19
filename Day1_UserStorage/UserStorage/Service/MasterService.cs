@@ -9,7 +9,8 @@ using NLog;
 
 namespace UserStorage.Service
 {
-    public class MasterService : IService<User>
+    [Serializable]
+    public class MasterService : MarshalByRefObject, IService<User>
     {
         private Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IRepository<User> userRepository;

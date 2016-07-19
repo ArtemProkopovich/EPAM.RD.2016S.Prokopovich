@@ -10,7 +10,8 @@ using NLog;
 
 namespace UserStorage.Service
 {
-    public class SlaveService : IService<User>
+    [Serializable]
+    public class SlaveService : MarshalByRefObject, IService<User>
     {
         private readonly IRepository<User> userRepository;
         private readonly bool isLogged = false;
