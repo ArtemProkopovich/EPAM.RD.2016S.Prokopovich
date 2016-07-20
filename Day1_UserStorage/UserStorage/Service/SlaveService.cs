@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UserStorage.Interfacies;
 using UserStorage.Entity;
 using UserStorage;
+using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Net.Sockets;
+using System.IO;
 using NLog;
 
 namespace UserStorage.Service
@@ -15,14 +20,26 @@ namespace UserStorage.Service
     {
         private readonly IRepository<User> userRepository;
         private readonly bool isLogged = false;
+        private readonly ServiceConnection connection;
+        private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private Logger logger = LogManager.GetCurrentClassLogger();
 
         public SlaveService(IRepository<User> userRepository)
         {
-            this.userRepository = userRepository;
+            if (userRepository == null)
+                throw new ArgumentNullException(nameof(userRepository));
+            this.userRepository = (IRepository<User>)userRepository.Clone();
         }
 
-        public SlaveService(IRepository<User> userRepository, bool isLogged) : this(userRepository)
+        public SlaveService(IRepository<User> userRepository, ServiceConnection connection) : this(userRepository)
+        {
+            if (connection == null)
+                throw new ArgumentNullException(nameof(connection));
+            this.connection = connection;
+            Listen();
+        }
+
+        public SlaveService(IRepository<User> userRepository, ServiceConnection connection, bool isLogged) : this(userRepository, connection)
         {
             this.isLogged = isLogged;
         }
@@ -43,22 +60,127 @@ namespace UserStorage.Service
 
         public IEnumerable<User> Search(params Func<User, bool>[] searchCriterias)
         {
-            if (isLogged)
-                logger.Info("message");
-            return userRepository.SearchAll(searchCriterias);
+            try
+            {
+                if (isLogged)
+                    logger.Info("message");
+                try
+                {
+                    slimLock.EnterReadLock();
+                    return userRepository.SearchAll(searchCriterias);
+                }
+                finally
+                {
+                    slimLock.ExitReadLock();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ServiceException();
+            }
         }
 
-        public void OnAdded(object sender, DataUpdatedEventArgs<User> args)
+        protected void Listen()
         {
-            if (isLogged)
-                logger.Info("message");
-            userRepository.Add(args.data);
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                TcpListener listener = null;
+                try
+                {
+                    listener = new TcpListener(connection.Address, connection.Port);
+                    listener.Start();
+                    while(true)
+                    {                      
+                        TcpClient client = listener.AcceptTcpClient();
+                        NetworkStream stream = client.GetStream();
+                        var ms = ReadNetworkStream(stream);
+                        var message = DeserializeMessage(ms);
+                        ProcessMessage(message);
+                    }
+                }
+                finally
+                {
+                    listener?.Stop();
+                }
+            }));
+            thread.Start();
         }
-        public void OnDeleted(object sender, DataUpdatedEventArgs<User> args)
+
+        private MemoryStream ReadNetworkStream(Stream stream)
         {
-            if (isLogged)
-                logger.Info("message");
-            userRepository.Delete(args.data);
+            MemoryStream ms = new MemoryStream();
+            int bufferLength = 1024;
+            byte[] buffer = new byte[bufferLength];
+            int bytesRead = 0;
+            do
+            {
+                bytesRead = stream.Read(buffer, 0, buffer.Length);
+                ms.Write(buffer, 0, buffer.Length);
+            }
+            while (bytesRead == buffer.Length);
+            return ms;
+        }
+
+        private ServiceMessage DeserializeMessage(Stream stream)
+        {
+            var formatter = new BinaryFormatter();
+            return formatter.Deserialize(stream) as ServiceMessage;
+        }
+
+        private void ProcessMessage(ServiceMessage message)
+        {
+            switch (message.Operation)
+            {
+                case Operation.Add:
+                    OnAdded(null, new DataUpdatedEventArgs<User>() { data = message.user });
+                    break;
+                case Operation.Delete:
+                    OnDeleted(null, new DataUpdatedEventArgs<User>() { data = message.user });
+                    break;
+            }
+        }
+
+        protected void OnAdded(object sender, DataUpdatedEventArgs<User> args)
+        {
+            try
+            {
+                if (isLogged)
+                    logger.Info("message");
+                try
+                {
+                    slimLock.EnterWriteLock();
+                    userRepository.Add(args.data);
+                }
+                finally
+                {
+                    slimLock.ExitWriteLock();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new ServiceException();
+            }
+        }
+        protected void OnDeleted(object sender, DataUpdatedEventArgs<User> args)
+        {
+            try
+            {
+                if (isLogged)
+                    logger.Info("message");
+                try
+                {
+                    slimLock.EnterWriteLock();
+                    userRepository.Delete(args.data);
+                }
+                finally
+                {
+                    slimLock.ExitWriteLock();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new ServiceException();
+            }
         }
 
         public void Save()

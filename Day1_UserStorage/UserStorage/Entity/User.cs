@@ -83,8 +83,8 @@ namespace UserStorage.Entity
             {
                 Id = Id,
                 PersonalId = PersonalId,
-                FirstName = FirstName,
-                LastName = LastName,
+                FirstName = string.Copy(FirstName),
+                LastName = string.Copy(LastName),
                 BirthDate = BirthDate,
                 Gender = Gender,
                 Visas = Visas

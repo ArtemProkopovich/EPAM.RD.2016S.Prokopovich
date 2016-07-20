@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
+using System.Net;
+using System.Net.Sockets; 
 using UserStorage.Interfacies;
 using UserStorage.Entity;
+using System.Runtime.Serialization.Formatters.Binary;
 using NLog;
 
 namespace UserStorage.Service
@@ -15,17 +20,28 @@ namespace UserStorage.Service
         private Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IRepository<User> userRepository;
         private readonly bool isLogged = false;
-        public event EventHandler<DataUpdatedEventArgs<User>> Added;
-        public event EventHandler<DataUpdatedEventArgs<User>> Deleted;
+        private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
+        private readonly IEnumerable<ServiceConnection> connections;
+        //public event EventHandler<DataUpdatedEventArgs<User>> Added;
+        //public event EventHandler<DataUpdatedEventArgs<User>> Deleted;
 
         public MasterService(IRepository<User> userRepository)
         {
-            this.userRepository = userRepository;
-            Added += (o, arg) => { };
-            Deleted += (o, arg) => { };
+            if (userRepository == null)
+                throw new ArgumentNullException(nameof(userRepository));
+            this.userRepository = (IRepository<User>)userRepository.Clone();
+            //Added += (o, arg) => { };
+            //Deleted += (o, arg) => { };
         }
 
-        public MasterService(IRepository<User> userRepository, bool isLogged) : this(userRepository)
+        public MasterService(IRepository<User> userRepository, IEnumerable<ServiceConnection> connections) : this(userRepository)
+        {
+            if (connections == null)
+                throw new ArgumentNullException(nameof(connections));
+            this.connections = connections;
+        }
+
+        public MasterService(IRepository<User> userRepository, IEnumerable<ServiceConnection> connections, bool isLogged) : this(userRepository, connections)
         {
             this.isLogged = isLogged;
         }
@@ -36,7 +52,16 @@ namespace UserStorage.Service
             {
                 if (isLogged)
                     logger.Info("message");
-                int result = userRepository.Add(item);
+                int result = 0;
+                try
+                {
+                    slimLock.EnterWriteLock();
+                    result = userRepository.Add(item);
+                }
+                finally
+                {
+                    slimLock.ExitWriteLock();
+                }
                 OnAdded(new DataUpdatedEventArgs<User>() { data = userRepository.GetById(result) });
                 return result;
             }
@@ -52,8 +77,17 @@ namespace UserStorage.Service
             {
                 if (isLogged)
                     logger.Info("message");
-                var user = userRepository.GetById(id);
-                userRepository.Delete(user);
+                User user = null;
+                try
+                {
+                    slimLock.EnterWriteLock();
+                    user = userRepository.GetById(id);
+                    userRepository.Delete(user);
+                }
+                finally
+                {
+                    slimLock.ExitWriteLock();
+                }
                 OnDeleted(new DataUpdatedEventArgs<User>() { data = user });
             }
             catch (Exception ex)
@@ -68,7 +102,15 @@ namespace UserStorage.Service
             {
                 if (isLogged)
                     logger.Info("message");
-                return userRepository.SearchAll(searchCriterias);
+                try
+                {
+                    slimLock.EnterReadLock();
+                    return userRepository.SearchAll(searchCriterias);
+                }
+                finally
+                {
+                    slimLock.ExitReadLock();
+                }
             }
             catch (Exception ex)
             {
@@ -82,7 +124,15 @@ namespace UserStorage.Service
             {
                 if (isLogged)
                     logger.Info("message");
-                userRepository.Save();
+                try
+                {
+                    slimLock.EnterWriteLock();
+                    userRepository.Save();
+                }
+                finally
+                {
+                    slimLock.ExitWriteLock();
+                }
             }
             catch (Exception ex)
             {
@@ -92,12 +142,41 @@ namespace UserStorage.Service
 
         protected void OnAdded(DataUpdatedEventArgs<User> arg)
         {
-            Added?.Invoke(this, arg);
+            SendMessage(new ServiceMessage() { Operation = Operation.Add, user = arg.data });
         }
 
         protected void OnDeleted(DataUpdatedEventArgs<User> arg)
         {
-            Deleted?.Invoke(this, arg);
+            SendMessage(new ServiceMessage() { Operation = Operation.Delete, user = arg.data });
+        }
+
+        private void SendMessage(ServiceMessage msg)
+        {
+            foreach(var cn in connections)
+            {
+                TcpClient clinet = null;
+                Stream stream = null;
+                try
+                {
+                    TcpClient client = new TcpClient(cn.Address.ToString(), cn.Port);
+                    var data = SerializeMessage(msg);
+                    stream = client.GetStream();
+                    stream.Write(data, 0, data.Length);
+                }
+                finally
+                {
+                    stream?.Close();
+                    clinet?.Close();
+                }
+            }
+        }
+
+        private byte[] SerializeMessage(ServiceMessage msg)
+        {
+            BinaryFormatter fm = new BinaryFormatter();
+            MemoryStream ms = new MemoryStream();
+            fm.Serialize(ms, msg);
+            return ms.GetBuffer();
         }
 
     }

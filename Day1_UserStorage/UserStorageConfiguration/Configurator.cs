@@ -4,10 +4,12 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 using System.Diagnostics;
 using System.Reflection;
 using UserStorageConfiguration.Configuration.FileConfiguration;
 using UserStorageConfiguration.Configuration.ServiceConfiguration;
+using UserStorageConfiguration.Configuration.NetworkConfiguration;
 using UserStorage.Service;
 using UserStorage.Repository;
 using UserStorage.Interfacies;
@@ -27,11 +29,9 @@ namespace UserStorageConfiguration
             {
                 if (ValidateConfig())
                 {
-                    string filePath = GetFilePathFromConfig();
-                    var masterConf = GetMasterServiceConfig();
-                    var masterRep = GetMasterRepository(masterConf, filePath);
-                    var master = new MasterService(masterRep);
-                    var slaves = InitSlaves(master, masterRep);
+                    var masterRep = GetMasterRepository(GetMasterServiceConfig(), GetFilePathFromConfig());
+                    var master = InitMasterService(masterRep);
+                    var slaves = InitSlaveServices(master, masterRep);
                     return new ServiceKeeper(master, slaves);
                 }
                 else
@@ -47,67 +47,33 @@ namespace UserStorageConfiguration
             }
         }
 
-        public ServiceKeeper InitializeWithDomens()
+        private MasterService InitMasterService(IRepository<User> repository)
         {
-            try
-            {
-                if (ValidateConfig())
-                {
-                    string filePath = GetFilePathFromConfig();
-                    var masterConf = GetMasterServiceConfig();
-                    var masterRep = GetMasterRepository(masterConf, filePath);
-                    var master = InitMasterServiceInDomain(masterRep);
-                    var slaves = InitSlaveServicesInDomains(master, masterRep);
-                    return new ServiceKeeper(master, slaves);
-                }
-                else
-                    throw new ConfigurationException();
-            }
-            catch (ConfigurationException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException();
-            }
+            return CreateService<MasterService>("MasterDomain", repository);
         }
 
-        private MasterService InitMasterServiceInDomain(IRepository<User> rep)
+        private IEnumerable<SlaveService> InitSlaveServices(MasterService master, IRepository<User> repository)
         {
-            AppDomain domain = AppDomain.CreateDomain("MasterDomain");
-            var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"UserStorage.dll");
-            var instance = loader.LoadFrom(path, typeof(MasterService), rep);
-            return (MasterService)instance;
-        }
-
-        private IEnumerable<SlaveService> InitSlaveServicesInDomains(MasterService master, IRepository<User> rep)
-        {
-            int domainNumber = 1;
+            int slaveCount = GetSlavesCount();
             var serviceConfig = ServiceConfig.GetConfig();
             List<SlaveService> result = new List<SlaveService>();
-            foreach (var service in serviceConfig.Services)
+            for (int i = 0; i < slaveCount; i++)
             {
-                var s = (Service)service;
-                if (s.Type == "slave")
-                {
-                    int count = int.Parse(s.Count);
-                    for (int i = 0; i < count; i++)
-                    {
-                        string domainName = "SlaveDomain" + domainNumber;
-                        AppDomain domain = AppDomain.CreateDomain(domainName);
-                        var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
-                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserStorage.dll");
-                        var slave = (SlaveService)loader.LoadFrom(path, typeof(SlaveService), rep);
-                        master.Added += slave.OnAdded;
-                        master.Deleted += slave.OnDeleted;
-                        result.Add(slave);
-                        domainNumber++;
-                    }
-                }
+                string domainName = "SlaveDomain" + i + 1;
+                var slave = CreateService<SlaveService>(domainName, repository);
+                //master.Added += slave.OnAdded;
+                //master.Deleted += slave.OnDeleted;
+                result.Add(slave);
             }
             return result;
+        }
+
+        private T CreateService<T>(string domainName, IRepository<User> repository)
+        {
+            AppDomain domain = AppDomain.CreateDomain(domainName);
+            var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserStorage.dll");
+            return (T)loader.LoadFrom(path, typeof(T), repository);
         }
 
         private bool ValidateConfig()
@@ -154,28 +120,22 @@ namespace UserStorageConfiguration
             return true;
         }
 
-        private IEnumerable<SlaveService> InitSlaves(MasterService master, IRepository<User> rep)
+        private int GetSlavesCount()
         {
+            int result = 0;
             var serviceConfig = ServiceConfig.GetConfig();
-            List<SlaveService> result = new List<SlaveService>();
             foreach (var service in serviceConfig.Services)
             {
                 var s = (Service)service;
                 if (s.Type == "slave")
                 {
                     int count = int.Parse(s.Count);
-                    for (int i = 0; i < count; i++)
-                    {
-                        var slave = new SlaveService((IRepository<User>)rep.Clone());
-                        master.Added += slave.OnAdded;
-                        master.Deleted += slave.OnDeleted;
-                        result.Add(slave);
-                    }
+                    result += count;
                 }
             }
             return result;
         }
-             
+            
         private Service GetMasterServiceConfig()
         {
             var serviceConfig = ServiceConfig.GetConfig();
@@ -215,6 +175,18 @@ namespace UserStorageConfiguration
             return DefaultPath;
         }
 
+        private ServiceConnection GetConnectionFromConfig()
+        {
+            var connConfig = ConnectionConfig.GetConfig();
+            foreach (var conn in connConfig.Connections)
+            {
+                var connection = conn as Connection;
+                return new ServiceConnection() { Address = IPAddress.Parse(connection.Address), Port = int.Parse(connection.Port) };
+            }
+            return DefaultConnection;
+        }
+
+        private readonly ServiceConnection DefaultConnection = new ServiceConnection() { Address = IPAddress.Parse("127.0.0.1"), Port = 10000 };
         private const string DefaultPath = "defaultFile.xml"; 
     }
 }

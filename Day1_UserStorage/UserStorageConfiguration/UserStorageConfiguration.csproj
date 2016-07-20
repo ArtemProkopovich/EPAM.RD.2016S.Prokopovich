@@ -45,6 +45,9 @@
     <Compile Include="Configuration\FileConfiguration\FilePath.cs" />
     <Compile Include="Configuration\FileConfiguration\FilePathCollection.cs" />
     <Compile Include="Configuration\FileConfiguration\FilePathConfig.cs" />
+    <Compile Include="Configuration\NetworkConfiguration\Connection.cs" />
+    <Compile Include="Configuration\NetworkConfiguration\ConnectionCollection.cs" />
+    <Compile Include="Configuration\NetworkConfiguration\ConnectionConfig.cs" />
     <Compile Include="Configuration\ServiceConfiguration\Service.cs" />
     <Compile Include="Configuration\ServiceConfiguration\ServiceCollection.cs" />
     <Compile Include="Configuration\ServiceConfiguration\ServiceConfig.cs" />

@@ -13,7 +13,7 @@ namespace UserStorageConfiguration
     {
         public object LoadFrom(string fileName, Type type, IRepository<User> rep)
         {
-            var assembly = Assembly.LoadFile(fileName);
+            var assembly = Assembly.LoadFrom(fileName);
             var types = assembly.GetTypes();
             var instanceType = types.FirstOrDefault(e => e.Name == type.Name);
             var instance = Activator.CreateInstance(instanceType, new object[] { rep });
