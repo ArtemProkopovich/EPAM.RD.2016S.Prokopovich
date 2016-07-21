@@ -21,13 +21,14 @@ namespace ClientApplication
             var keeper = conf.Initialize();
             
             CancellationTokenSource cts = new CancellationTokenSource();
-            CancellationToken token = cts.Token;
-            List<User> addedUsers = new List<User>();
+            CancellationToken token = cts.Token;           
             var start = new ManualResetEventSlim(false);
+
             WaitCallback callMaster = (object param) =>
             {
                 start.Wait();
                 MasterService master = (MasterService)param;
+                List<User> addedUsers = master.Search(e => true).ToList();
                 while (true)
                 {
                     if (token.IsCancellationRequested)
@@ -85,7 +86,9 @@ namespace ClientApplication
             Console.ReadLine();
             cts.Cancel();
             Console.WriteLine("Threads stoped");
-            Console.ReadLine();
+            Console.WriteLine("Data from master will be saved");
+            keeper.Master.Save();
+            Console.ReadLine();          
         }
 
 

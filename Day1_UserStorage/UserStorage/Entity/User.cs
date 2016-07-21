@@ -79,7 +79,7 @@ namespace UserStorage.Entity
 
         public override string ToString()
         {
-            return "User FirstName: " + FirstName + " LastName: " + LastName + " PersonalID: " + PersonalId + ".";
+            return "User ID: " + Id + " FirstName: " + FirstName + " LastName: " + LastName + ".";
         }
 
         public User Clone()

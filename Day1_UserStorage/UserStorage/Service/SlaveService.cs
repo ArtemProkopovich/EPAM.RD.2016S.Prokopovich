@@ -103,6 +103,7 @@ namespace UserStorage.Service
                     listener?.Stop();
                 }
             }));
+            thread.IsBackground = true;
             thread.Start();
         }
 
