@@ -77,14 +77,19 @@ namespace UserStorage.Entity
             return false;
         }
 
+        public override string ToString()
+        {
+            return "User FirstName: " + FirstName + " LastName: " + LastName + " PersonalID: " + PersonalId + ".";
+        }
+
         public User Clone()
         {
             return new User()
             {
                 Id = Id,
                 PersonalId = PersonalId,
-                FirstName = string.Copy(FirstName),
-                LastName = string.Copy(LastName),
+                FirstName = FirstName,
+                LastName = LastName,
                 BirthDate = BirthDate,
                 Gender = Gender,
                 Visas = Visas

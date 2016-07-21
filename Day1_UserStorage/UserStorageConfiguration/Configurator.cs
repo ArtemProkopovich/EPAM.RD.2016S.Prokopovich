@@ -30,8 +30,9 @@ namespace UserStorageConfiguration
                 if (ValidateConfig())
                 {
                     var masterRep = GetMasterRepository(GetMasterServiceConfig(), GetFilePathFromConfig());
-                    var master = InitMasterService(masterRep);
-                    var slaves = InitSlaveServices(master, masterRep);
+                    var connections = GetConnectionsFromConfig();
+                    var slaves = InitSlaveServices(masterRep, connections);
+                    var master = InitMasterService(masterRep, connections.Take(slaves.Count()).ToList());                   
                     return new ServiceKeeper(master, slaves);
                 }
                 else
@@ -47,33 +48,32 @@ namespace UserStorageConfiguration
             }
         }
 
-        private MasterService InitMasterService(IRepository<User> repository)
+        private MasterService InitMasterService(IRepository<User> repository, IEnumerable<ServiceConnection> connections)
         {
-            return CreateService<MasterService>("MasterDomain", repository);
+            return CreateService<MasterService>("MasterDomain", repository, connections);
         }
 
-        private IEnumerable<SlaveService> InitSlaveServices(MasterService master, IRepository<User> repository)
+        private IEnumerable<SlaveService> InitSlaveServices(IRepository<User> repository, IEnumerable<ServiceConnection> connections)
         {
             int slaveCount = GetSlavesCount();
             var serviceConfig = ServiceConfig.GetConfig();
+            var cns = connections.ToList();
             List<SlaveService> result = new List<SlaveService>();
             for (int i = 0; i < slaveCount; i++)
             {
                 string domainName = "SlaveDomain" + i + 1;
-                var slave = CreateService<SlaveService>(domainName, repository);
-                //master.Added += slave.OnAdded;
-                //master.Deleted += slave.OnDeleted;
+                var slave = CreateService<SlaveService>(domainName, repository, cns[i]);
                 result.Add(slave);
             }
             return result;
         }
 
-        private T CreateService<T>(string domainName, IRepository<User> repository)
+        private T CreateService<T>(string domainName, params object[] p)
         {
             AppDomain domain = AppDomain.CreateDomain(domainName);
             var loader = (DomainAssemblyLoader)domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(DomainAssemblyLoader).FullName);
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UserStorage.dll");
-            return (T)loader.LoadFrom(path, typeof(T), repository);
+            return (T)loader.LoadFrom(path, typeof(T), p);
         }
 
         private bool ValidateConfig()
@@ -115,6 +115,8 @@ namespace UserStorageConfiguration
                     throw new ConfigurationException();
                 }
             }
+            if (GetSlavesCount() > GetConnectionsFromConfig().Count())
+                throw new ConfigurationException();
             if (masterCount != 1 || !masterFound)
                 throw new ConfigurationException();
             return true;
@@ -175,18 +177,18 @@ namespace UserStorageConfiguration
             return DefaultPath;
         }
 
-        private ServiceConnection GetConnectionFromConfig()
+        private IEnumerable<ServiceConnection> GetConnectionsFromConfig()
         {
             var connConfig = ConnectionConfig.GetConfig();
+            var result = new List<ServiceConnection>();
             foreach (var conn in connConfig.Connections)
             {
                 var connection = conn as Connection;
-                return new ServiceConnection() { Address = IPAddress.Parse(connection.Address), Port = int.Parse(connection.Port) };
+                result.Add( new ServiceConnection() { Address = IPAddress.Parse(connection.Address), Port = int.Parse(connection.Port) });
             }
-            return DefaultConnection;
+            return result;
         }
 
-        private readonly ServiceConnection DefaultConnection = new ServiceConnection() { Address = IPAddress.Parse("127.0.0.1"), Port = 10000 };
         private const string DefaultPath = "defaultFile.xml"; 
     }
 }

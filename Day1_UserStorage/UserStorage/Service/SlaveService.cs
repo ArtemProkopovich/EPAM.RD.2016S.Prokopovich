@@ -23,6 +23,7 @@ namespace UserStorage.Service
         private readonly ServiceConnection connection;
         private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private Logger logger = LogManager.GetCurrentClassLogger();
+        public Guid ServiceId { get; set; } = Guid.NewGuid();
 
         public SlaveService(IRepository<User> userRepository)
         {
@@ -51,7 +52,7 @@ namespace UserStorage.Service
             throw new FeatureNotAvailiableException();
         }
 
-        public void Delete(int id)
+        public void Delete(User item)
         {
             if (isLogged)
                 logger.Info("message");
@@ -93,8 +94,7 @@ namespace UserStorage.Service
                     {                      
                         TcpClient client = listener.AcceptTcpClient();
                         NetworkStream stream = client.GetStream();
-                        var ms = ReadNetworkStream(stream);
-                        var message = DeserializeMessage(ms);
+                        var message = DeserializeMessage(stream);
                         ProcessMessage(message);
                     }
                 }
@@ -104,21 +104,6 @@ namespace UserStorage.Service
                 }
             }));
             thread.Start();
-        }
-
-        private MemoryStream ReadNetworkStream(Stream stream)
-        {
-            MemoryStream ms = new MemoryStream();
-            int bufferLength = 1024;
-            byte[] buffer = new byte[bufferLength];
-            int bytesRead = 0;
-            do
-            {
-                bytesRead = stream.Read(buffer, 0, buffer.Length);
-                ms.Write(buffer, 0, buffer.Length);
-            }
-            while (bytesRead == buffer.Length);
-            return ms;
         }
 
         private ServiceMessage DeserializeMessage(Stream stream)

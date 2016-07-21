@@ -47,7 +47,7 @@ namespace UserStorageConfiguration.Configuration.NetworkConfiguration
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((Connection)element).Address;
+            return ((Connection)element).Port;
         }
     }
 }

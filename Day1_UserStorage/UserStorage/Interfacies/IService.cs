@@ -10,9 +10,10 @@ namespace UserStorage.Interfacies
 {
     public interface IService<T>
     {
+        Guid ServiceId { get; set; }
         int Add(T item);
         IEnumerable<T> Search(params Func<T, bool>[] searchCriterias);
-        void Delete(int id);
+        void Delete(T item);
         void Save();
     }
 }

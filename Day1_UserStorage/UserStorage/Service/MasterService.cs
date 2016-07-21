@@ -22,6 +22,8 @@ namespace UserStorage.Service
         private readonly bool isLogged = false;
         private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private readonly IEnumerable<ServiceConnection> connections;
+        public Guid ServiceId { get; set; } = Guid.NewGuid();
+
         //public event EventHandler<DataUpdatedEventArgs<User>> Added;
         //public event EventHandler<DataUpdatedEventArgs<User>> Deleted;
 
@@ -71,24 +73,22 @@ namespace UserStorage.Service
             }
         }
 
-        public void Delete(int id)
+        public void Delete(User item)
         {
             try
             {
                 if (isLogged)
                     logger.Info("message");
-                User user = null;
                 try
                 {
                     slimLock.EnterWriteLock();
-                    user = userRepository.GetById(id);
-                    userRepository.Delete(user);
+                    userRepository.Delete(item);
                 }
                 finally
                 {
                     slimLock.ExitWriteLock();
                 }
-                OnDeleted(new DataUpdatedEventArgs<User>() { data = user });
+                OnDeleted(new DataUpdatedEventArgs<User>() { data = item });
             }
             catch (Exception ex)
             {
