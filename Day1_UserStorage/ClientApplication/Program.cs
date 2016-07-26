@@ -17,18 +17,18 @@ namespace ClientApplication
 
         public static void Main(string[] args)
         {
-            Configurator conf = new Configurator();
+            var conf = new Configurator();
             var keeper = conf.Initialize();
             
-            CancellationTokenSource cts = new CancellationTokenSource();
-            CancellationToken token = cts.Token;           
+            var cts = new CancellationTokenSource();
+            var token = cts.Token;           
             var start = new ManualResetEventSlim(false);
 
             WaitCallback callMaster = (object param) =>
             {
                 start.Wait();
-                MasterService master = (MasterService)param;
-                List<User> addedUsers = master.Search(e => true).ToList();
+                var master = (MasterService)param;
+                var addedUsers = master.Search(e => true).ToList();
                 while (true)
                 {
                     if (token.IsCancellationRequested)
