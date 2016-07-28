@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,7 +96,7 @@ namespace UserStorage.Service
             }
         }
 
-        public IEnumerable<User> Search(params Func<User, bool>[] searchCriterias)
+        public IEnumerable<User> Search(Func<User, bool> searchCriteria)
         {
             try
             {
@@ -105,7 +105,7 @@ namespace UserStorage.Service
                 try
                 {
                     slimLock.EnterReadLock();
-                    return userRepository.SearchAll(searchCriterias);
+                    return userRepository.SearchAll(searchCriteria);
                 }
                 finally
                 {

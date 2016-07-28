@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using UserStorage.Entity;
@@ -14,9 +14,7 @@ namespace UserStorage.Interfacies
         int Add(T item);
         T GetById(int id);
         IEnumerable<T> GetAll();
-        IEnumerable<T> SearchAll(Func<T, bool> criteria);
-        IEnumerable<T> SearchAll(params Func<T, bool>[] criterias);
-        T SearchFirst(Func<T, bool> criteria);
+        IEnumerable<T> SearchAll(Func<User, bool> searchCriteria);
         void Delete(T user);
         void Save();
     }

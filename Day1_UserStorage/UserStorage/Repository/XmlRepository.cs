@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using UserStorage.Interfacies;
@@ -57,19 +57,9 @@ namespace UserStorage.Repository
             return repository.GetById(id);
         }
 
-        public override IEnumerable<User> SearchAll(params Func<User, bool>[] criterias)
+        public override IEnumerable<User> SearchAll(Func<User, bool> searchCriteria)
         {
-            return repository.SearchAll(criterias);
-        }
-
-        public override IEnumerable<User> SearchAll(Func<User, bool> criteria)
-        {
-            return repository.SearchAll(criteria);
-        }
-
-        public override User SearchFirst(Func<User, bool> criteria)
-        {
-            return repository.SearchFirst(criteria);
+            return repository.SearchAll(searchCriteria);
         }
 
         public override void Save()

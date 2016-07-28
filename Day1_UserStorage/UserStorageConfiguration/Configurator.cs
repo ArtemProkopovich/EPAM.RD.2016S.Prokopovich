@@ -23,7 +23,7 @@ namespace UserStorageConfiguration
         private List<string> Types = new List<string>() { "master", "slave" };
         private BooleanSwitch sw = new BooleanSwitch("logSwitch", "description", "1");
 
-        public ServiceKeeper Initialize()
+        public ServiceProxy Initialize()
         {
             try
             {
@@ -33,7 +33,7 @@ namespace UserStorageConfiguration
                     var connections = GetConnectionsFromConfig();
                     var slaves = InitSlaveServices(masterRep, connections);
                     var master = InitMasterService(masterRep, connections.Take(slaves.Count()).ToList());                   
-                    return new ServiceKeeper(master, slaves);
+                    return new ServiceProxy(master, slaves);
                 }
                 else
                     throw new ConfigurationException();

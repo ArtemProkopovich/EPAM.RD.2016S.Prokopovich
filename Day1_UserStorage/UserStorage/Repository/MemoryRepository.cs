@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using UserStorage.Interfacies;
@@ -70,24 +71,9 @@ namespace UserStorage.Repository
             
         }
 
-        public override IEnumerable<User> SearchAll(params Func<User, bool>[] criterias)
+        public override IEnumerable<User> SearchAll(Func<User, bool> searchCriteria)
         {
-            IEnumerable<User> result = new List<User>();
-            foreach (var func in criterias)
-            {
-                result = result.Union(SearchAll(func));
-            }
-            return result.ToList();
-        }
-
-        public override IEnumerable<User> SearchAll(Func<User, bool> criteria)
-        {
-            return userList.Where(criteria).ToList();
-        }
-
-        public override User SearchFirst(Func<User, bool> criteria)
-        {
-            return userList.FirstOrDefault(criteria);
+            return userList.Where(searchCriteria).ToList();
         }
 
         protected override int AddItem(User item)

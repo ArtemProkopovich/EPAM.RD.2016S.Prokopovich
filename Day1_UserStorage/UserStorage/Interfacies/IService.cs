@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace UserStorage.Interfacies
     {
         Guid ServiceId { get; set; }
         int Add(T item);
-        IEnumerable<T> Search(params Func<T, bool>[] searchCriterias);
+        IEnumerable<T> Search(Func<T, bool> searchCriteria);
         void Delete(T item);
         void Save();
     }

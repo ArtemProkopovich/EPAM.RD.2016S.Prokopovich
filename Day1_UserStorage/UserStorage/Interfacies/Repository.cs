@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using UserStorage.Entity;
 
@@ -43,9 +43,7 @@ namespace UserStorage.Interfacies
             throw new InvalidArgumentException("The model is not valid.", nameof(item));
         }
 
-        public abstract IEnumerable<T> SearchAll(Func<T, bool> criteria);
-        public abstract IEnumerable<T> SearchAll(params Func<T, bool>[] criterias);
-        public abstract T SearchFirst(Func<T, bool> criteria);
+        public abstract IEnumerable<T> SearchAll(Func<User, bool> searchCriteria);
         public abstract void Delete(T user);
 
         public abstract IEnumerable<T> GetAll();

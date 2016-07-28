@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,18 +18,16 @@ namespace ClientApplication
 
         public static void Main(string[] args)
         {
-            var conf = new Configurator();
-            var keeper = conf.Initialize();
-            
+            Thread.Sleep(10000);
+            var service = new ServiceReference.UserServiceClient();
             var cts = new CancellationTokenSource();
-            var token = cts.Token;           
+            var token = cts.Token;
             var start = new ManualResetEventSlim(false);
 
-            WaitCallback callMaster = (object param) =>
+            WaitCallback callService = (object state) =>
             {
                 start.Wait();
-                var master = (MasterService)param;
-                var addedUsers = master.Search(e => true).ToList();
+                var addedUsers = service.Search().ToList();
                 while (true)
                 {
                     if (token.IsCancellationRequested)
@@ -39,56 +38,39 @@ namespace ClientApplication
                         case 0:
                             var user = GenerateUser();
                             addedUsers.Add(user);
-                            Console.WriteLine("User {0} will be add to master.", user);
-                            master.Add(user);
+                            Console.WriteLine("User {0} will be add.", user);
+                            service.Add(user);
                             break;
                         case 1:
                             if (addedUsers.Count > 0)
                             {
                                 var dUser = addedUsers[random.Next(addedUsers.Count)];
                                 addedUsers.RemoveAll(e => e.Equals(dUser));
-                                Console.WriteLine("User {0} will be deleted from master.", dUser);
-                                master.Delete(dUser);
+                                Console.WriteLine("User {0} will be deleted.", dUser);
+                                service.Delete(dUser);
                             }
-                            break;                             
+                            break;
                         default:
-                            var users = master.Search(e => true);
-                            PrintUsers("Users in master now:", users);
+                            var users = service.Search();
+                            PrintUsers("Users in rep now:", users);
                             break;
                     }
-                    Thread.Sleep(1200);
+                    Thread.Sleep(random.Next(500, 1500));
                 }
             };
 
-            WaitCallback callSlave = (object param) =>
+            for (int i = 0; i < 3; i++)
             {
-                start.Wait();
-                SlaveService slave = (SlaveService)param;
-                while (true)
-                {
-                    if (token.IsCancellationRequested)
-                        break;
-                    var users = slave.Search(e => true);
-                    PrintUsers("Users in slave " + slave.ServiceId.ToString().Substring(0, 6) + " now:", users);
-                    Thread.Sleep(1000);
-                }
-            };
-
-            ThreadPool.QueueUserWorkItem(callMaster, keeper.Master);
-            foreach(var s in keeper.Slaves)
-            {
-                ThreadPool.QueueUserWorkItem(callSlave, s);
+                ThreadPool.QueueUserWorkItem(callService);
             }
-            
-            Console.WriteLine("Services will started.");
+
+            Console.WriteLine("Threads will started.");
             Console.WriteLine("Press any key to stop");
             start.Set();
             Console.ReadLine();
             cts.Cancel();
             Console.WriteLine("Threads stoped");
-            Console.WriteLine("Data from master will be saved");
-            keeper.Master.Save();
-            Console.ReadLine();          
+            Console.ReadLine();
         }
 
 
