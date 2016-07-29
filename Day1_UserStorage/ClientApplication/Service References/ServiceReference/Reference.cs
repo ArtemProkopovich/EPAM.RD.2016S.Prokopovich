@@ -22,10 +22,10 @@ namespace ClientApplication.ServiceReference {
         System.Threading.Tasks.Task<int> AddAsync(UserStorage.Entity.User item);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/Search", ReplyAction="http://tempuri.org/IUserService/SearchResponse")]
-        UserStorage.Entity.User[] Search();
+        UserStorage.Entity.User[] Search(UserStorage.Entity.UserCriteria criteria);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/Search", ReplyAction="http://tempuri.org/IUserService/SearchResponse")]
-        System.Threading.Tasks.Task<UserStorage.Entity.User[]> SearchAsync();
+        System.Threading.Tasks.Task<UserStorage.Entity.User[]> SearchAsync(UserStorage.Entity.UserCriteria criteria);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/Delete", ReplyAction="http://tempuri.org/IUserService/DeleteResponse")]
         void Delete(UserStorage.Entity.User item);
@@ -69,12 +69,12 @@ namespace ClientApplication.ServiceReference {
             return base.Channel.AddAsync(item);
         }
         
-        public UserStorage.Entity.User[] Search() {
-            return base.Channel.Search();
+        public UserStorage.Entity.User[] Search(UserStorage.Entity.UserCriteria criteria) {
+            return base.Channel.Search(criteria);
         }
         
-        public System.Threading.Tasks.Task<UserStorage.Entity.User[]> SearchAsync() {
-            return base.Channel.SearchAsync();
+        public System.Threading.Tasks.Task<UserStorage.Entity.User[]> SearchAsync(UserStorage.Entity.UserCriteria criteria) {
+            return base.Channel.SearchAsync(criteria);
         }
         
         public void Delete(UserStorage.Entity.User item) {

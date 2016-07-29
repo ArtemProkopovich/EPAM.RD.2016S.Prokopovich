@@ -18,7 +18,11 @@ namespace ClientApplication
 
         public static void Main(string[] args)
         {
-            Thread.Sleep(10000);
+            Mutex mutex;
+            while (!Mutex.TryOpenExisting("name", out mutex))
+                Thread.Sleep(100);
+            mutex.WaitOne();
+
             var service = new ServiceReference.UserServiceClient();
             var cts = new CancellationTokenSource();
             var token = cts.Token;
@@ -27,7 +31,7 @@ namespace ClientApplication
             WaitCallback callService = (object state) =>
             {
                 start.Wait();
-                var addedUsers = service.Search().ToList();
+                var addedUsers = service.Search(null).ToList();
                 while (true)
                 {
                     if (token.IsCancellationRequested)
@@ -51,7 +55,7 @@ namespace ClientApplication
                             }
                             break;
                         default:
-                            var users = service.Search();
+                            var users = service.Search(null);
                             PrintUsers("Users in rep now:", users);
                             break;
                     }
@@ -81,6 +85,7 @@ namespace ClientApplication
             foreach(var u in users)
             {
                 Console.WriteLine("{0}. {1}", i, u);
+                i++;
             }
         }
 

@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/UserStorage.Entity" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/UserStorage.Entity" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:import namespace="http://schemas.datacontract.org/2004/07/System" />
   <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
   <xs:complexType name="User">
     <xs:sequence>
@@ -11,7 +10,6 @@
       <xs:element name="_x003C_LastName_x003E_k__BackingField" nillable="true" type="xs:string" />
       <xs:element name="_x003C_PersonalId_x003E_k__BackingField" nillable="true" type="xs:string" />
       <xs:element name="_x003C_Visas_x003E_k__BackingField" nillable="true" type="tns:ArrayOfVisa" />
-      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/System" name="comparison" nillable="true" type="q1:ComparisonOfUseroovKFxEG" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="User" nillable="true" type="tns:User" />
@@ -41,6 +39,15 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="Visa" nillable="true" type="tns:Visa" />
+  <xs:complexType name="UserCriteria">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="FirstName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Id" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="LastName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PersonalId" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="UserCriteria" nillable="true" type="tns:UserCriteria" />
   <xs:complexType name="ArrayOfUser">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="User" nillable="true" type="tns:User" />

@@ -17,7 +17,7 @@ namespace WcfService
         int Add(User item);
 
         [OperationContract]
-        IEnumerable<User> Search();
+        IEnumerable<User> Search(UserCriteria criteria);
 
         [OperationContract]
         void Delete(User item);

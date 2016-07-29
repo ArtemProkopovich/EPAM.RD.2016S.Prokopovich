@@ -19,15 +19,6 @@ namespace UserStorage.Service
             this.Slaves = slaves.ToList();
         }
 
-        public Guid ServiceId
-        {
-            get
-            {
-                return Master.ServiceId;
-            }
-            set { }
-        }
-
         public int Add(User item)
         {
             return Master.Add(item);
@@ -43,16 +34,16 @@ namespace UserStorage.Service
             Master.Save();
         }
 
-        private volatile int curSlave = 0;
+        private volatile int currentSlave = 0;
 
-        public IEnumerable<User> Search(Func<User, bool> searchCriteria)
+        public IEnumerable<User> Search(ICriteria<User> searchCriteria)
         {
             if (Slaves.Count < 0)
                 return Master.Search(searchCriteria);
             else
             {
-                int slave = curSlave;
-                curSlave = (curSlave + 1) % Slaves.Count;
+                int slave = currentSlave;
+                currentSlave = (currentSlave + 1) % Slaves.Count;
                 return Slaves[slave].Search(searchCriteria);
             }
         }

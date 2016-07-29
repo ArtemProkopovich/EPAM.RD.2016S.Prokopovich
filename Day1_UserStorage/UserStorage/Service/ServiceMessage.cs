@@ -7,7 +7,7 @@ using UserStorage.Entity;
 namespace UserStorage.Service
 {
     [Serializable]
-    public enum Operation { Add, Delete };
+    public enum Operation { Add=1, Delete=2 };
     [Serializable]
     public class ServiceMessage
     {

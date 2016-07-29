@@ -31,7 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.3.5\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.3.6\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -48,7 +48,10 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entity\UserCriteria.cs" />
+    <Compile Include="Extension\UserCriteriaExtension.cs" />
     <Compile Include="Interfacies\EndedIdValuesException.cs" />
+    <Compile Include="Interfacies\ICriteria.cs" />
     <Compile Include="Interfacies\IService.cs" />
     <Compile Include="Interfacies\IUnitOfWork.cs" />
     <Compile Include="Repository\MemoryRepository.cs" />
@@ -61,6 +64,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\RepositoryException.cs" />
     <Compile Include="Repository\XmlRepository.cs" />
+    <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\JsonMemberAttribute.cs" />
     <Compile Include="Serialization\JsonObjectAttribute.cs" />
     <Compile Include="Serialization\JsonSerializer.cs" />

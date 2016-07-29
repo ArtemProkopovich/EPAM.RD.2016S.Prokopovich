@@ -66,9 +66,6 @@
     <None Include="Service References\ServiceReference\service1.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\ServiceReference\System.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Service References\ServiceReference\UserStorage.Entity.xsd">
       <SubType>Designer</SubType>
     </None>

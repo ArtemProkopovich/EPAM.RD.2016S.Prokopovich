@@ -9,6 +9,8 @@ using System.Net;
 using System.Net.Sockets; 
 using UserStorage.Interfacies;
 using UserStorage.Entity;
+using UserStorage.Extension;
+using UserStorage.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using NLog;
 
@@ -19,21 +21,16 @@ namespace UserStorage.Service
     {
         private Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IRepository<User> userRepository;
-        private readonly bool isLogged = false;
+        private readonly bool isLogged = true;
         private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private readonly IEnumerable<ServiceConnection> connections;
-        public Guid ServiceId { get; set; } = Guid.NewGuid();
 
-        //public event EventHandler<DataUpdatedEventArgs<User>> Added;
-        //public event EventHandler<DataUpdatedEventArgs<User>> Deleted;
 
         public MasterService(IRepository<User> userRepository)
         {
             if (userRepository == null)
                 throw new ArgumentNullException(nameof(userRepository));
             this.userRepository = (IRepository<User>)userRepository.Clone();
-            //Added += (o, arg) => { };
-            //Deleted += (o, arg) => { };
         }
 
         public MasterService(IRepository<User> userRepository, IEnumerable<ServiceConnection> connections) : this(userRepository)
@@ -96,7 +93,7 @@ namespace UserStorage.Service
             }
         }
 
-        public IEnumerable<User> Search(Func<User, bool> searchCriteria)
+        public IEnumerable<User> Search(ICriteria<User> searchCriteria)
         {
             try
             {
@@ -105,7 +102,7 @@ namespace UserStorage.Service
                 try
                 {
                     slimLock.EnterReadLock();
-                    return userRepository.SearchAll(searchCriteria);
+                    return userRepository.SearchAll(searchCriteria.CreateFunc());
                 }
                 finally
                 {
@@ -173,9 +170,11 @@ namespace UserStorage.Service
 
         private byte[] SerializeMessage(ServiceMessage msg)
         {
-            BinaryFormatter fm = new BinaryFormatter();
+            //BinaryFormatter fm = new BinaryFormatter();
             MemoryStream ms = new MemoryStream();
-            fm.Serialize(ms, msg);
+            //fm.Serialize(ms, msg);
+            var serializer = new JsonSerializer();
+            serializer.SerializeObject(msg, ms);
             return ms.GetBuffer();
         }
 

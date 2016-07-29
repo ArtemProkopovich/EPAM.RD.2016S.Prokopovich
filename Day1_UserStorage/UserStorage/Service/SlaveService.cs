@@ -6,12 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UserStorage.Interfacies;
 using UserStorage.Entity;
+using UserStorage.Extension;
 using UserStorage;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Net.Sockets;
 using System.IO;
 using NLog;
+using UserStorage.Serialization;
 
 namespace UserStorage.Service
 {
@@ -19,7 +21,7 @@ namespace UserStorage.Service
     public class SlaveService : MarshalByRefObject, IService<User>
     {
         private readonly IRepository<User> userRepository;
-        private readonly bool isLogged = false;
+        private readonly bool isLogged = true;
         private readonly ServiceConnection connection;
         private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private Logger logger = LogManager.GetCurrentClassLogger();
@@ -59,7 +61,7 @@ namespace UserStorage.Service
             throw new FeatureNotAvailiableException();
         }
 
-        public IEnumerable<User> Search(Func<User, bool> searchCriteria)
+        public IEnumerable<User> Search(ICriteria<User> searchCriteria)
         {
             try
             {
@@ -68,7 +70,7 @@ namespace UserStorage.Service
                 try
                 {
                     slimLock.EnterReadLock();
-                    return userRepository.SearchAll(searchCriteria);
+                    return userRepository.SearchAll(searchCriteria.CreateFunc());
                 }
                 finally
                 {
@@ -109,8 +111,10 @@ namespace UserStorage.Service
 
         private ServiceMessage DeserializeMessage(Stream stream)
         {
-            var formatter = new BinaryFormatter();
-            return formatter.Deserialize(stream) as ServiceMessage;
+            var serializer = new JsonSerializer();
+            return serializer.DeserializeObject(stream);
+            //var formatter = new BinaryFormatter();
+            //return formatter.Deserialize(stream) as ServiceMessage;
         }
 
         private void ProcessMessage(ServiceMessage message)

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UserStorage.Entity
+namespace UserStorage.Interfacies
 {
-    [Serializable]
-    public enum Gender
+    public interface ICriteria<T>
     {
-        Male = 1, Female = 2
     }
 }

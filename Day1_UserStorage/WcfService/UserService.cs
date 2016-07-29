@@ -34,9 +34,9 @@ namespace WcfService
             proxy.Delete(item);
         }
 
-        public IEnumerable<User> Search()
+        public IEnumerable<User> Search(UserCriteria criteria)
         {
-            return proxy.Search(e => { return true; });
+            return proxy.Search(criteria);
         }
     }
 }
