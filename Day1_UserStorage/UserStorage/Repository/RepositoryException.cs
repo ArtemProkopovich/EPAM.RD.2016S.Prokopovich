@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UserStorage.Repository
 {
@@ -13,6 +9,14 @@ namespace UserStorage.Repository
         public RepositoryException()
         {
 
+        }
+
+        public RepositoryException(string message) : base(message)
+        {
+        }
+
+        public RepositoryException(string message, Exception innerException) : base(message, innerException)
+        {
         }
 
         public RepositoryException(SerializationInfo info, StreamingContext context)

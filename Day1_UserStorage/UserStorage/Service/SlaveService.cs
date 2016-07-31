@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UserStorage.Interfacies;
 using UserStorage.Entity;
 using UserStorage.Extension;
-using UserStorage;
-using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Net.Sockets;
 using System.IO;
+using System.Threading.Tasks;
 using NLog;
+using UserStorage.Net;
 using UserStorage.Serialization;
 
 namespace UserStorage.Service
@@ -23,15 +19,15 @@ namespace UserStorage.Service
         private readonly IRepository<User> userRepository;
         private readonly bool isLogged = true;
         private readonly ServiceConnection connection;
-        private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
-        private Logger logger = LogManager.GetCurrentClassLogger();
-        public Guid ServiceId { get; set; } = Guid.NewGuid();
+        private readonly ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public SlaveService(IRepository<User> userRepository)
         {
             if (userRepository == null)
                 throw new ArgumentNullException(nameof(userRepository));
             this.userRepository = (IRepository<User>)userRepository.Clone();
+            Listen();
         }
 
         public SlaveService(IRepository<User> userRepository, ServiceConnection connection) : this(userRepository)
@@ -39,7 +35,6 @@ namespace UserStorage.Service
             if (connection == null)
                 throw new ArgumentNullException(nameof(connection));
             this.connection = connection;
-            Listen();
         }
 
         public SlaveService(IRepository<User> userRepository, ServiceConnection connection, bool isLogged) : this(userRepository, connection)
@@ -51,14 +46,14 @@ namespace UserStorage.Service
         {
             if (isLogged)
                 logger.Info("message");
-            throw new FeatureNotAvailiableException();
+            throw new FeatureNotAvailiableException("Add method not availible for slave service.");
         }
 
         public void Delete(User item)
         {
             if (isLogged)
                 logger.Info("message");
-            throw new FeatureNotAvailiableException();
+            throw new FeatureNotAvailiableException("Delete method not availible for slave service.");
         }
 
         public IEnumerable<User> Search(ICriteria<User> searchCriteria)
@@ -79,42 +74,45 @@ namespace UserStorage.Service
             }
             catch (Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
 
         protected void Listen()
         {
-            Thread thread = new Thread(new ThreadStart(() =>
+            ThreadPool.QueueUserWorkItem(async (e) =>
             {
-                TcpListener listener = null;
                 try
                 {
-                    listener = new TcpListener(connection.Address, connection.Port);
+                    TcpListener listener = new TcpListener(connection.Address, connection.Port);
                     listener.Start();
-                    while(true)
-                    {                      
-                        TcpClient client = listener.AcceptTcpClient();
-                        NetworkStream stream = client.GetStream();
-                        var message = DeserializeMessage(stream);
-                        ProcessMessage(message);
+                    while (true)
+                    {
+                        TcpClient tcpClient = null;
+                        try
+                        {
+                            tcpClient = await listener.AcceptTcpClientAsync();
+                            NetworkStream stream = tcpClient.GetStream();
+                            var message = await ReadMessage(stream);
+                            ProcessMessage(message);
+                        }
+                        finally
+                        {
+                            tcpClient?.Close();
+                        }
                     }
                 }
-                finally
+                catch (Exception ex)
                 {
-                    listener?.Stop();
+                    throw new ServiceException("Exception in tcp connection", ex);
                 }
-            }));
-            thread.IsBackground = true;
-            thread.Start();
+            });
         }
 
-        private ServiceMessage DeserializeMessage(Stream stream)
+        private Task<ServiceMessage> ReadMessage(Stream stream)
         {
             var serializer = new JsonSerializer();
-            return serializer.DeserializeObject(stream);
-            //var formatter = new BinaryFormatter();
-            //return formatter.Deserialize(stream) as ServiceMessage;
+            return Task.FromResult(serializer.DeserializeObject(stream));
         }
 
         private void ProcessMessage(ServiceMessage message)
@@ -148,7 +146,7 @@ namespace UserStorage.Service
             }
             catch(Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
         protected void OnDeleted(object sender, DataUpdatedEventArgs<User> args)
@@ -169,7 +167,7 @@ namespace UserStorage.Service
             }
             catch(Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
 
@@ -177,7 +175,7 @@ namespace UserStorage.Service
         {
             if (isLogged)
                 logger.Info("message");
-            throw new FeatureNotAvailiableException();
+            throw new FeatureNotAvailiableException("Save method not availible for slave service.");
         }
     }
 }

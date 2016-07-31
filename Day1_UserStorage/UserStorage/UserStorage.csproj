@@ -50,7 +50,9 @@
   <ItemGroup>
     <Compile Include="Entity\UserCriteria.cs" />
     <Compile Include="Extension\UserCriteriaExtension.cs" />
-    <Compile Include="Interfacies\EndedIdValuesException.cs" />
+    <Compile Include="Net\AsyncTcpClient.cs" />
+    <Compile Include="Net\AsyncTcpServer.cs" />
+    <Compile Include="Repository\EndedIdValuesException.cs" />
     <Compile Include="Interfacies\ICriteria.cs" />
     <Compile Include="Interfacies\IService.cs" />
     <Compile Include="Interfacies\IUnitOfWork.cs" />
@@ -58,7 +60,7 @@
     <Compile Include="Entity\Gender.cs" />
     <Compile Include="Entity\User.cs" />
     <Compile Include="Entity\Visa.cs" />
-    <Compile Include="Interfacies\InvalidArgumentException.cs" />
+    <Compile Include="Repository\InvalidArgumentException.cs" />
     <Compile Include="Interfacies\IRepository.cs" />
     <Compile Include="Interfacies\Repository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

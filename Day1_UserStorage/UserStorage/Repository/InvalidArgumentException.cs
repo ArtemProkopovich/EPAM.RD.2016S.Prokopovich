@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
 namespace UserStorage.Interfacies
@@ -10,9 +6,17 @@ namespace UserStorage.Interfacies
     [Serializable]
     public class InvalidArgumentException: ArgumentException
     {
+        public InvalidArgumentException()
+        {
+        }
+
         public InvalidArgumentException(string message) : base(message)
         {
 
+        }
+
+        public InvalidArgumentException(string message, Exception innerException) : base(message, innerException)
+        {
         }
 
         public InvalidArgumentException(string message, string paramName) : base(message, paramName)
@@ -23,6 +27,10 @@ namespace UserStorage.Interfacies
         public InvalidArgumentException(SerializationInfo info, StreamingContext context)
         {
 
+        }
+
+        public InvalidArgumentException(string message, string paramName, Exception innerException) : base(message, paramName, innerException)
+        {
         }
     }
 }

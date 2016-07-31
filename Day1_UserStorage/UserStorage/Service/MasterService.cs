@@ -1,30 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
-using System.Net;
 using System.Net.Sockets; 
 using UserStorage.Interfacies;
 using UserStorage.Entity;
 using UserStorage.Extension;
 using UserStorage.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using NLog;
+using UserStorage.Net;
 
 namespace UserStorage.Service
 {
     [Serializable]
     public class MasterService : MarshalByRefObject, IService<User>
     {
-        private Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IRepository<User> userRepository;
         private readonly bool isLogged = true;
-        private ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private readonly IEnumerable<ServiceConnection> connections;
-
 
         public MasterService(IRepository<User> userRepository)
         {
@@ -66,7 +61,7 @@ namespace UserStorage.Service
             }
             catch (Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
 
@@ -89,7 +84,7 @@ namespace UserStorage.Service
             }
             catch (Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
 
@@ -111,7 +106,7 @@ namespace UserStorage.Service
             }
             catch (Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
 
@@ -133,7 +128,7 @@ namespace UserStorage.Service
             }
             catch (Exception ex)
             {
-                throw new ServiceException();
+                throw new ServiceException("Error in the service", ex);
             }
         }
 
@@ -147,32 +142,26 @@ namespace UserStorage.Service
             SendMessage(new ServiceMessage() { Operation = Operation.Delete, user = arg.data });
         }
 
-        private void SendMessage(ServiceMessage msg)
+        private async void SendMessage(ServiceMessage msg)
         {
             foreach(var cn in connections)
             {
-                TcpClient clinet = null;
-                Stream stream = null;
                 try
                 {
-                    TcpClient client = new TcpClient(cn.Address.ToString(), cn.Port);
+                    var client = new AsyncTcpClient(cn.Address, cn.Port);
                     var data = SerializeMessage(msg);
-                    stream = client.GetStream();
-                    stream.Write(data, 0, data.Length);
+                    await client.SendMessage(data);
                 }
-                finally
+                catch (Exception ex)
                 {
-                    stream?.Close();
-                    clinet?.Close();
+                    throw new ServiceException("Error in the service", ex);
                 }
             }
         }
 
         private byte[] SerializeMessage(ServiceMessage msg)
         {
-            //BinaryFormatter fm = new BinaryFormatter();
             MemoryStream ms = new MemoryStream();
-            //fm.Serialize(ms, msg);
             var serializer = new JsonSerializer();
             serializer.SerializeObject(msg, ms);
             return ms.GetBuffer();

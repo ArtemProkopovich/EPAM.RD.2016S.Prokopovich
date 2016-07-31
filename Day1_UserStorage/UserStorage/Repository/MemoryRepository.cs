@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using UserStorage.Interfacies;
 using UserStorage.Entity;
 
@@ -85,7 +82,7 @@ namespace UserStorage.Repository
                 userList.Add(newItem);
                 return newItem.Id;
             }
-            throw new EndedIdValuesException();
+            throw new EndedIdValuesException("The id sequence is over");
         }
 
         private void ConfigureIdSequence()
@@ -98,7 +95,7 @@ namespace UserStorage.Repository
                     if (idEnumerator.Current >= id)
                         return;
                 }
-                throw new EndedIdValuesException();
+                throw new EndedIdValuesException("The id sequence is over");
             }
         }
     }

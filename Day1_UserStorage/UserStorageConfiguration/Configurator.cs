@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Diagnostics;
 using System.Reflection;
@@ -35,8 +33,7 @@ namespace UserStorageConfiguration
                     var master = InitMasterService(masterRep, connections.Take(slaves.Count()).ToList());                   
                     return new ServiceProxy(master, slaves);
                 }
-                else
-                    throw new ConfigurationException();
+                    throw new ConfigurationException("Config file invalid.");
             }
             catch (ConfigurationException ex)
             {
@@ -44,7 +41,7 @@ namespace UserStorageConfiguration
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException();
+                throw new ConfigurationException("Failed to configure application", ex);
             }
         }
 
@@ -86,39 +83,39 @@ namespace UserStorageConfiguration
                 if (service is Service)
                 {
                     var s = (Service)service;
-                    if (!storageTypes.Any(e => e == s.Storage.ToLower()))
-                        throw new ConfigurationException();
-                    if (!Types.Any(e => e == s.Type.ToLower()))
-                        throw new ConfigurationException();
+                    if (storageTypes.All(e => e != s.Storage.ToLower()))
+                        throw new ConfigurationException("Unknown value of storage type attribute");
+                    if (Types.All(e => e != s.Type.ToLower()))
+                        throw new ConfigurationException("Unknown value of service type attribute");
                     if (s.Type.ToLower() == "slave" && s.Storage.ToLower() != "memory")
-                        throw new ConfigurationException();
+                        throw new ConfigurationException("Slave service can have only memory repository");
                     int count = 0;
                     if (s.Type.ToLower() == "master")
                     {
                         if (masterFound)
-                            throw new ConfigurationException();
+                            throw new ConfigurationException("Сan not be more than one master service");
                         else
                             masterFound = true;
                     }
                     if (int.TryParse(s.Count, out count))
                     {
                         if (count < 0)
-                            throw new ConfigurationException();
+                            throw new ConfigurationException("Value of service count attribute can't be less than zero.");
                         if (s.Type.ToLower() == "master")
                             masterCount += count;
                     }
                     else
-                        throw new ConfigurationException();
+                        throw new ConfigurationException("Can't parse value in service count attribute");
                 }
                 else
                 {
-                    throw new ConfigurationException();
+                    throw new ConfigurationException("", new InvalidCastException());
                 }
             }
             if (GetSlavesCount() > GetConnectionsFromConfig().Count())
-                throw new ConfigurationException();
+                throw new ConfigurationException("Count of slaves cant'be more than count of possible connections");
             if (masterCount != 1 || !masterFound)
-                throw new ConfigurationException();
+                throw new ConfigurationException("Сan not be more than one master service");
             return true;
         }
 
@@ -184,7 +181,8 @@ namespace UserStorageConfiguration
             foreach (var conn in connConfig.Connections)
             {
                 var connection = conn as Connection;
-                result.Add( new ServiceConnection() { Address = IPAddress.Parse(connection.Address), Port = int.Parse(connection.Port) });
+                if (connection != null)
+                    result.Add( new ServiceConnection() { Address = IPAddress.Parse(connection.Address), Port = int.Parse(connection.Port) });
             }
             return result;
         }

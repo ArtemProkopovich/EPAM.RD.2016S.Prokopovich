@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using UserStorage.Interfacies;
 using UserStorage.Entity;
 using System.Xml.Serialization;
@@ -13,53 +10,53 @@ namespace UserStorage.Repository
     [Serializable]
     public class XmlRepository : Repository<User>
     {
-        public MemoryRepository repository { get; private set; }
-        public string filePath { get; private set; }
+        public MemoryRepository Repository { get; private set; }
+        public string FilePath { get; private set; }
 
         public XmlRepository(string filePath)
         {
-            this.filePath = filePath;
+            this.FilePath = filePath;
             var users = LoadFromXml();
-            repository = new MemoryRepository(users);
+            Repository = new MemoryRepository(users);
         }
 
         public XmlRepository(string filePath, IEnumerable<int> idSequence)
         {
-            this.filePath = filePath;
+            this.FilePath = filePath;
             var users = LoadFromXml();
-            repository = new MemoryRepository(users, idSequence);
+            Repository = new MemoryRepository(users, idSequence);
         }
 
         public XmlRepository(string filePath, IEnumerable<int> idSequence, params Func<User, bool>[] validationFuncs)
         {
-            this.filePath = filePath;
+            this.FilePath = filePath;
             var users = LoadFromXml();
-            repository = new MemoryRepository(users, idSequence, validationFuncs);
+            Repository = new MemoryRepository(users, idSequence, validationFuncs);
         }
 
         public override Repository<User> Clone()
         {
-            return new XmlRepository(filePath, idSequence, validationFuncs);
+            return new XmlRepository(FilePath, idSequence, validationFuncs);
         }
 
         public override void Delete(User user)
         {
-            repository.Delete(user);
+            Repository.Delete(user);
         }
 
         public override IEnumerable<User> GetAll()
         {
-            return repository.GetAll();
+            return Repository.GetAll();
         }
 
         public override User GetById(int id)
         {
-            return repository.GetById(id);
+            return Repository.GetById(id);
         }
 
         public override IEnumerable<User> SearchAll(Func<User, bool> searchCriteria)
         {
-            return repository.SearchAll(searchCriteria);
+            return Repository.SearchAll(searchCriteria);
         }
 
         public override void Save()
@@ -69,7 +66,7 @@ namespace UserStorage.Repository
 
         protected override int AddItem(User item)
         {
-            return repository.Add(item);
+            return Repository.Add(item);
         }
 
         private IEnumerable<User> LoadFromXml()
@@ -77,7 +74,7 @@ namespace UserStorage.Repository
             FileStream fs = null;
             try
             {
-                fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
+                fs = new FileStream(FilePath, FileMode.OpenOrCreate, FileAccess.Read);
                 if (fs.Position != fs.Length)
                 {
                     XmlSerializer xs = new XmlSerializer(typeof(List<User>), new Type[] { typeof(User) });
@@ -88,7 +85,7 @@ namespace UserStorage.Repository
             }
             catch (Exception ex)
             {
-                throw new RepositoryException();
+                throw new RepositoryException("Error when loading a file", ex);
             }
             finally
             {
@@ -102,13 +99,13 @@ namespace UserStorage.Repository
             FileStream fs = null;
             try
             {
-                fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write);
                 XmlSerializer xs = new XmlSerializer(typeof(List<User>), new Type[] { typeof(User) });
-                xs.Serialize(fs, repository.GetAll());
+                xs.Serialize(fs, Repository.GetAll());
             }
             catch (Exception ex)
             {
-                throw new RepositoryException();
+                throw new RepositoryException("Error when saving a file", ex);
             }
             finally
             {

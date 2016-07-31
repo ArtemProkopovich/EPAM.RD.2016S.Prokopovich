@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
 namespace UserStorage.Service
@@ -10,14 +6,20 @@ namespace UserStorage.Service
     [Serializable]
     public class ServiceException : Exception
     {
-        public ServiceException() : base()
+        public ServiceException()
         {
-
         }
 
-        public ServiceException(SerializationInfo info, StreamingContext context)
+        public ServiceException(string message) : base(message)
         {
+        }
 
+        public ServiceException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected ServiceException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
     }
 }

@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using UserStorageConfiguration;
-using System.Configuration;
-using UserStorage.Service;
 using UserStorage.Entity;
 
 namespace ClientApplication
@@ -63,7 +58,7 @@ namespace ClientApplication
                 }
             };
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
                 ThreadPool.QueueUserWorkItem(callService);
             }
