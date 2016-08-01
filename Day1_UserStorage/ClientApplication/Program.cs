@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using UserStorage.Entity;
+using System.Collections.Concurrent;
 
 namespace ClientApplication
 {
     public class Program
     {
         static volatile Random random = new Random();
+        private static readonly int threadsCount = 5;
 
         public static void Main(string[] args)
         {
@@ -22,45 +24,56 @@ namespace ClientApplication
             var cts = new CancellationTokenSource();
             var token = cts.Token;
             var start = new ManualResetEventSlim(false);
-
             WaitCallback callService = (object state) =>
             {
                 start.Wait();
-                var addedUsers = service.Search(null).ToList();
+                var users = service.Search(null).ToList();
                 while (true)
                 {
                     if (token.IsCancellationRequested)
                         break;
-                    int opType = random.Next(3);
+                    int opType = random.Next(2);
                     switch (opType)
                     {
                         case 0:
                             var user = GenerateUser();
-                            addedUsers.Add(user);
                             Console.WriteLine("User {0} will be add.", user);
-                            service.Add(user);
+                            int result = service.Add(user);
+                            user.Id = result;
+                            users.Add(user);
                             break;
                         case 1:
-                            if (addedUsers.Count > 0)
+                            if (users.Count > 0)
                             {
-                                var dUser = addedUsers[random.Next(addedUsers.Count)];
-                                addedUsers.RemoveAll(e => e.Equals(dUser));
+                                var dUser = users.ElementAt(random.Next(users.Count));
+                                users.RemoveAll(e => e.Equals(dUser));
                                 Console.WriteLine("User {0} will be deleted.", dUser);
                                 service.Delete(dUser);
                             }
-                            break;
-                        default:
-                            var users = service.Search(null);
-                            PrintUsers("Users in rep now:", users);
                             break;
                     }
                     Thread.Sleep(random.Next(500, 1500));
                 }
             };
 
-            for (int i = 0; i < 1; i++)
+            WaitCallback searchingService = (object state) =>
             {
-                ThreadPool.QueueUserWorkItem(callService);
+                start.Wait();
+                while (true)
+                {
+                    if (token.IsCancellationRequested)
+                        break;                   
+                    var users = service.Search(null).ToList();
+                    PrintUsers("Users in rep now:", users);
+                    Thread.Sleep(random.Next(1000, 1500));
+                }
+            };
+            for (int i = 0; i < threadsCount; i++)
+            {
+                if (i == 0)
+                    ThreadPool.QueueUserWorkItem(callService);
+                else
+                    ThreadPool.QueueUserWorkItem(searchingService);
             }
 
             Console.WriteLine("Threads will started.");
