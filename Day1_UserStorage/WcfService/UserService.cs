@@ -34,28 +34,48 @@ namespace WcfService
         public UserService(ServiceProxy proxy)
         {
             this.proxy = proxy;
-        }       
+        }
 
         public int Add(User item)
         {
-           
-            int result =  proxy.Add(item);
-            item.Id = result;
-            OnAdded(new ServiceEventArgs() { User = item });
-            return result;
+            try
+            {
+                int result = proxy.Add(item);
+                item.Id = result;
+                OnAdded(new ServiceEventArgs() { User = item });
+                return result;
+            }
+            catch(Exception ex)
+            {
+                throw new FaultException<WcfServiceException>(new WcfServiceException() { exception = ex }, new FaultReason("wcf exception"));
+            }
         }
 
         public void Delete(User item)
-        {           
-            proxy.Delete(item);
-            OnDeleted(new ServiceEventArgs() { User = item });
+        {
+            try
+            {
+                proxy.Delete(item);
+                OnDeleted(new ServiceEventArgs() { User = item });
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException<WcfServiceException>(new WcfServiceException() { exception = ex }, new FaultReason("wcf exception"));
+            }
         }
 
         public IEnumerable<User> Search(UserCriteria criteria)
         {
-            var result = proxy.Search(criteria).ToList();
-            OnSearched(new ServiceSearchEventArgs() {Criteria = criteria, Count = result.Count});
-            return result;
+            try
+            {
+                var result = proxy.Search(criteria).ToList();
+                OnSearched(new ServiceSearchEventArgs() { Criteria = criteria, Count = result.Count });
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException<WcfServiceException>(new WcfServiceException() { exception = ex }, new FaultReason("wcf exception"));
+            }
         }
 
         protected void OnAdded(ServiceEventArgs args)

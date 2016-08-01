@@ -3,8 +3,10 @@
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
       <xsd:import namespace="http://tempuri.org/" />
+      <xsd:import namespace="http://schemas.datacontract.org/2004/07/WcfService" />
       <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import namespace="http://schemas.datacontract.org/2004/07/UserStorage.Entity" />
+      <xsd:import namespace="http://schemas.datacontract.org/2004/07/System" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IUserService_Add_InputMessage">
@@ -13,11 +15,17 @@
   <wsdl:message name="IUserService_Add_OutputMessage">
     <wsdl:part name="parameters" element="tns:AddResponse" />
   </wsdl:message>
+  <wsdl:message name="IUserService_Add_WcfServiceExceptionFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/WcfService" name="detail" element="q1:WcfServiceException" />
+  </wsdl:message>
   <wsdl:message name="IUserService_Search_InputMessage">
     <wsdl:part name="parameters" element="tns:Search" />
   </wsdl:message>
   <wsdl:message name="IUserService_Search_OutputMessage">
     <wsdl:part name="parameters" element="tns:SearchResponse" />
+  </wsdl:message>
+  <wsdl:message name="IUserService_Search_WcfServiceExceptionFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/WcfService" name="detail" element="q2:WcfServiceException" />
   </wsdl:message>
   <wsdl:message name="IUserService_Delete_InputMessage">
     <wsdl:part name="parameters" element="tns:Delete" />
@@ -25,18 +33,24 @@
   <wsdl:message name="IUserService_Delete_OutputMessage">
     <wsdl:part name="parameters" element="tns:DeleteResponse" />
   </wsdl:message>
+  <wsdl:message name="IUserService_Delete_WcfServiceExceptionFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/WcfService" name="detail" element="q3:WcfServiceException" />
+  </wsdl:message>
   <wsdl:portType name="IUserService">
     <wsdl:operation name="Add">
       <wsdl:input wsaw:Action="http://tempuri.org/IUserService/Add" message="tns:IUserService_Add_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IUserService/AddResponse" message="tns:IUserService_Add_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IUserService/AddWcfServiceExceptionFault" name="WcfServiceExceptionFault" message="tns:IUserService_Add_WcfServiceExceptionFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="Search">
       <wsdl:input wsaw:Action="http://tempuri.org/IUserService/Search" message="tns:IUserService_Search_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IUserService/SearchResponse" message="tns:IUserService_Search_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IUserService/SearchWcfServiceExceptionFault" name="WcfServiceExceptionFault" message="tns:IUserService_Search_WcfServiceExceptionFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="Delete">
       <wsdl:input wsaw:Action="http://tempuri.org/IUserService/Delete" message="tns:IUserService_Delete_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IUserService/DeleteResponse" message="tns:IUserService_Delete_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IUserService/DeleteWcfServiceExceptionFault" name="WcfServiceExceptionFault" message="tns:IUserService_Delete_WcfServiceExceptionFault_FaultMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="BasicHttpBinding_IUserService" type="tns:IUserService">
@@ -49,6 +63,9 @@
       <wsdl:output>
         <soap:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="WcfServiceExceptionFault">
+        <soap:fault use="literal" name="WcfServiceExceptionFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="Search">
       <soap:operation soapAction="http://tempuri.org/IUserService/Search" style="document" />
@@ -58,6 +75,9 @@
       <wsdl:output>
         <soap:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="WcfServiceExceptionFault">
+        <soap:fault use="literal" name="WcfServiceExceptionFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="Delete">
       <soap:operation soapAction="http://tempuri.org/IUserService/Delete" style="document" />
@@ -67,6 +87,9 @@
       <wsdl:output>
         <soap:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="WcfServiceExceptionFault">
+        <soap:fault use="literal" name="WcfServiceExceptionFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="UserService">

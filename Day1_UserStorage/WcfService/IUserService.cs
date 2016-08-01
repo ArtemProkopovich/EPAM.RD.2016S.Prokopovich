@@ -1,25 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
 using System.ServiceModel;
-using UserStorage.Interfacies;
 using UserStorage.Entity;
-using System.Text;
+using UserStorage.Service;
 
 namespace WcfService
 {
 
     [ServiceContract]
     public interface IUserService
-    {
+    {        
         [OperationContract]
+        [FaultContract(typeof(WcfServiceException))]
         int Add(User item);
-
+       
         [OperationContract]
+        [FaultContract(typeof(WcfServiceException))]
         IEnumerable<User> Search(UserCriteria criteria);
-
+        
         [OperationContract]
+        [FaultContract(typeof(WcfServiceException))]
         void Delete(User item);
     }
 }

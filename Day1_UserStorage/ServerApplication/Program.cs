@@ -15,29 +15,37 @@ namespace ServerApplication
             bool createdNew = false;
             Mutex mutex = new Mutex(true, "name", out createdNew);
             Uri baseAddress = new Uri("http://localhost:8733/Design_Time_Addresses/WcfService/UserService/");
-            ServiceProxy proxy = new Configurator().Initialize();
-            var service = new UserService(proxy);
-            service.Added += OnAdded;
-            service.Deleted += OnDeleted;
-            service.Searched += OnSearched;
-            using (ServiceHost host = new ServiceHost(service, baseAddress))
+            try
             {
-                ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
-                smb.HttpGetEnabled = true;
-                smb.MetadataExporter.PolicyVersion = PolicyVersion.Policy15;
-                host.Description.Behaviors.Add(smb);
-                host.Open();
+                ServiceProxy proxy = new Configurator().Initialize();
+                var service = new UserService(proxy);
+                service.Added += OnAdded;
+                service.Deleted += OnDeleted;
+                service.Searched += OnSearched;
+                using (ServiceHost host = new ServiceHost(service, baseAddress))
+                {
+                    ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
+                    smb.HttpGetEnabled = true;
+                    smb.MetadataExporter.PolicyVersion = PolicyVersion.Policy15;
+                    host.Description.Behaviors.Add(smb);
+                    host.Open();
 
-                mutex.ReleaseMutex();
+                    mutex.ReleaseMutex();
 
-                Console.WriteLine("The service is ready at {0}", baseAddress);
-                Console.WriteLine("Press <Enter> to stop the service.");
-                Console.ReadLine();
+                    Console.WriteLine("The service is ready at {0}", baseAddress);
+                    Console.WriteLine("Press <Enter> to stop the service.");
+                    Console.ReadLine();
 
-                host.Close();
+                    host.Close();
+                }
+                proxy.Save();
+                Console.WriteLine("Master state was saved");
             }
-            proxy.Save();
-            Console.WriteLine("Master state was saved");
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Server failed with {ex.Message}");
+            }
+            
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();
         }

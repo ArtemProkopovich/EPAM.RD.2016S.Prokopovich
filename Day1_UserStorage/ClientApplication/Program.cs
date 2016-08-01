@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using UserStorage.Entity;
-using System.Collections.Concurrent;
+using System.ServiceModel;
 
 namespace ClientApplication
 {
@@ -19,7 +19,6 @@ namespace ClientApplication
             while (!Mutex.TryOpenExisting("name", out mutex))
                 Thread.Sleep(100);
             mutex.WaitOne();
-
             var service = new ServiceReference.UserServiceClient();
             var cts = new CancellationTokenSource();
             var token = cts.Token;
@@ -30,29 +29,38 @@ namespace ClientApplication
                 var users = service.Search(null).ToList();
                 while (true)
                 {
+                    
                     if (token.IsCancellationRequested)
                         break;
-                    int opType = random.Next(2);
-                    switch (opType)
+                    try
                     {
-                        case 0:
-                            var user = GenerateUser();
-                            Console.WriteLine("User {0} will be add.", user);
-                            int result = service.Add(user);
-                            user.Id = result;
-                            users.Add(user);
-                            break;
-                        case 1:
-                            if (users.Count > 0)
-                            {
-                                var dUser = users.ElementAt(random.Next(users.Count));
-                                users.RemoveAll(e => e.Equals(dUser));
-                                Console.WriteLine("User {0} will be deleted.", dUser);
-                                service.Delete(dUser);
-                            }
-                            break;
+                        int opType = random.Next(2);
+                        switch (opType)
+                        {
+                            case 0:
+                                var user = GenerateUser();
+                                Console.WriteLine("User {0} will be add.", user);
+                                int result = service.Add(user);
+                                user.Id = result;
+                                users.Add(user);
+                                break;
+                            case 1:
+                                if (users.Count > 0)
+                                {
+                                    var dUser = users.ElementAt(random.Next(users.Count));
+                                    users.RemoveAll(e => e.Equals(dUser));
+                                    Console.WriteLine("User {0} will be deleted.", dUser);
+                                    service.Delete(dUser);
+                                }
+                                break;
+                        }
+                        Thread.Sleep(random.Next(500, 1500));
                     }
-                    Thread.Sleep(random.Next(500, 1500));
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error when accessing the service {ex.Message}");
+                        break;
+                    }
                 }
             };
 
@@ -62,10 +70,18 @@ namespace ClientApplication
                 while (true)
                 {
                     if (token.IsCancellationRequested)
-                        break;                   
-                    var users = service.Search(null).ToList();
-                    PrintUsers("Users in rep now:", users);
-                    Thread.Sleep(random.Next(1000, 1500));
+                        break;
+                    try
+                    {
+                        var users = service.Search(null).ToList();
+                        PrintUsers("Users in rep now:", users);
+                        Thread.Sleep(random.Next(1000, 1500));
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine($"Error when accessing the service {ex.Message}");
+                        break;
+                    }
                 }
             };
             for (int i = 0; i < threadsCount; i++)
