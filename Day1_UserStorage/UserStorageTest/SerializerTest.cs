@@ -46,6 +46,7 @@ namespace UserStorageTest
             JsonSerializer js = new JsonSerializer();
             MemoryStream ms = new MemoryStream();
             js.SerializeObject(new ServiceMessage() { Operation = Operation.Add, user = u }, ms);
+            ms.Seek(0, SeekOrigin.Begin);
             ServiceMessage result = js.DeserializeObject(ms);
             Assert.AreEqual(u, result.user);
         }

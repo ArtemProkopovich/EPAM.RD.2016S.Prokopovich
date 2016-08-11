@@ -129,9 +129,9 @@ namespace UserStorageTest
             MemoryRepository rep = new MemoryRepository();
             //act
             var result = rep.Add(user);
-            var repUser = rep.SearchAll(e => e.Id == result).First();
+            var repUser = rep.SearchAll(e => e.Id == result).FirstOrDefault();
             rep.Delete(repUser);
-            var resultUser = rep.SearchAll(e => e.Id == result).First();
+            var resultUser = rep.SearchAll(e => e.Id == result).FirstOrDefault();
             //assert
             Assert.IsNull(resultUser);
             
