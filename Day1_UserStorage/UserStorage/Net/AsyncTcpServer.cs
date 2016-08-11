@@ -9,11 +9,21 @@ using System.Threading.Tasks;
 
 namespace UserStorage.Net
 {
+    /// <summary>
+    /// Simple async tcp server
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class AsyncTcpServer<T>
     {
         private readonly IPAddress address;
         private readonly int port;
         private readonly Func<Stream, Task<T>> processFunc;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address">Address for connection</param>
+        /// <param name="port">Port for connection</param
+        /// <param name="processFunc">Func that process receive message</param>
         public AsyncTcpServer(IPAddress address, int port, Func<Stream,Task<T>> processFunc)
         {
             this.address = address;
@@ -21,6 +31,10 @@ namespace UserStorage.Net
             this.processFunc = processFunc;
         }
 
+        /// <summary>
+        /// Start listening on current address and port
+        /// </summary>
+        /// <returns></returns>
         public async Task Start()
         {
             TcpListener listener = new TcpListener(address, port);
@@ -41,6 +55,11 @@ namespace UserStorage.Net
             }
         }
 
+        /// <summary>
+        /// Process receive message
+        /// </summary>
+        /// <param name="client">Client that send message</param>
+        /// <returns></returns>
         public async Task<T> ProccessMessage(TcpClient client)
         {
             using (var networkStream = client.GetStream())

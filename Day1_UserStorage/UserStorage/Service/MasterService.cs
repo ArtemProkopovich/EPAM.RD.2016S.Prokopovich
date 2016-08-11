@@ -12,6 +12,9 @@ using UserStorage.Net;
 
 namespace UserStorage.Service
 {
+    /// <summary>
+    /// Implementation of IService of users that provided all operations
+    /// </summary>
     [Serializable]
     public class MasterService : MarshalByRefObject, IService<User>
     {
@@ -21,6 +24,10 @@ namespace UserStorage.Service
         private readonly ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private readonly IEnumerable<ServiceConnection> connections;
 
+        /// <summary>
+        /// Create repository with specified repository
+        /// </summary>
+        /// <param name="userRepository">Init repository for service</param>
         public MasterService(IRepository<User> userRepository)
         {
             if (userRepository == null)
@@ -28,6 +35,11 @@ namespace UserStorage.Service
             this.userRepository = (IRepository<User>)userRepository.Clone();
         }
 
+        /// <summary>
+        /// Create repository with specified repository and connections
+        /// </summary>
+        /// <param name="userRepository">Init repository for service</param>
+        /// <param name="connections">Addresses which the master sends a messages</param>
         public MasterService(IRepository<User> userRepository, IEnumerable<ServiceConnection> connections) : this(userRepository)
         {
             if (connections == null)
@@ -35,11 +47,22 @@ namespace UserStorage.Service
             this.connections = connections;
         }
 
+        /// <summary>
+        /// Create repository with specified repository and connections
+        /// </summary>
+        /// <param name="userRepository">Init repository for service</param>
+        /// <param name="connections">Addresses which the master sends a messages</param>
+        /// <param name="isLogged">It indicates whether the service log is</param>
         public MasterService(IRepository<User> userRepository, IEnumerable<ServiceConnection> connections, bool isLogged) : this(userRepository, connections)
         {
             this.isLogged = isLogged;
         }
 
+        /// <summary>
+        /// Add item in service
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public int Add(User item)
         {
             try
@@ -56,7 +79,8 @@ namespace UserStorage.Service
                 {
                     slimLock.ExitWriteLock();
                 }
-                OnAdded(new DataUpdatedEventArgs<User>() { data = userRepository.GetById(result) });
+                item.Id = result;
+                OnAdded(new DataUpdatedEventArgs<User>() { data = item });
                 return result;
             }
             catch (Exception ex)
@@ -65,6 +89,10 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Delete item from service
+        /// </summary>
+        /// <param name="item"></param>
         public void Delete(User item)
         {
             try
@@ -88,6 +116,11 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Search items in repository
+        /// </summary>
+        /// <param name="searchCriteria"></param>
+        /// <returns></returns>
         public IEnumerable<User> Search(ICriteria<User> searchCriteria)
         {
             try
@@ -110,6 +143,9 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Save state of service
+        /// </summary>
         public void Save()
         {
             try
@@ -142,6 +178,10 @@ namespace UserStorage.Service
             SendMessage(new ServiceMessage() { Operation = Operation.Delete, user = arg.data });
         }
 
+        /// <summary>
+        /// Send message to clients of service
+        /// </summary>
+        /// <param name="msg"></param>
         private async void SendMessage(ServiceMessage msg)
         {
             foreach(var cn in connections)
@@ -159,6 +199,11 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Serialize message to json
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         private byte[] SerializeMessage(ServiceMessage msg)
         {
             MemoryStream ms = new MemoryStream();

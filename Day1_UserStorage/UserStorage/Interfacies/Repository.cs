@@ -5,12 +5,25 @@ using UserStorage.Entity;
 
 namespace UserStorage.Interfacies
 {
+    /// <summary>
+    /// Abstract implementation of IRepository with implemented validation logic
+    /// </summary>
+    /// <typeparam name="T">Type of objects in repository</typeparam>
     [Serializable]
     public abstract class Repository<T>: IRepository<T>
     {
-        public Func<T, bool>[] validationFuncs { get; private set; } = new Func<T, bool>[] { (x) => { return true; } };
-        public IEnumerable<int> idSequence { get; private set; }
-        public IEnumerator<int> idEnumerator { get; private set; }
+        /// <summary>
+        /// Delegates that checked validation of object
+        /// </summary>
+        protected Func<T, bool>[] validationFuncs { get; set; } = new Func<T, bool>[] { (x) => { return true; } };
+        /// <summary>
+        /// Sequence for generating Id.
+        /// </summary>
+        protected IEnumerable<int> idSequence { get; set; }
+        /// <summary>
+        /// Enumerator if idSequence
+        /// </summary>
+        protected IEnumerator<int> idEnumerator { get; set; }
 
         public Repository()
         {
@@ -18,6 +31,10 @@ namespace UserStorage.Interfacies
             idEnumerator = idSequence.GetEnumerator();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="idSequence">Sequence for generating Id.</param>
         public Repository(IEnumerable<int> idSequence) : this()
         {
             if (idSequence != null)
@@ -26,12 +43,21 @@ namespace UserStorage.Interfacies
                 idEnumerator = this.idSequence.GetEnumerator();
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="idSequence">Sequence for generating Id.</param>
+        /// <param name="validationFuncs">Delegates that checked validation of object</param>
         public Repository(IEnumerable<int> idSequence, params Func<T, bool>[] validationFuncs) : this(idSequence)
         {
             this.validationFuncs = validationFuncs;
         }
 
+        /// <summary>
+        /// Add item in repository
+        /// </summary>
+        /// <param name="item">The item that needs add</param>
+        /// <returns></returns>
         public int Add(T item)
         {
             if (item == null)
@@ -41,20 +67,38 @@ namespace UserStorage.Interfacies
             throw new InvalidArgumentException("The model is not valid.", nameof(item));
         }
 
+        /// <summary>
+        /// Search all elemetns that fir to criteria
+        /// </summary>
+        /// <param name="searchCriteria">Criteria for search</param>
+        /// <returns></returns>
         public abstract IEnumerable<T> SearchAll(Func<User, bool> searchCriteria);
-        public abstract void Delete(T user);
-
-        public abstract IEnumerable<T> GetAll();
-
-        public abstract T GetById(int id);
-
+        /// <summary>
+        /// Delete item from repository
+        /// </summary>
+        /// <param name="item"></param>
+        public abstract void Delete(T item);
+        /// <summary>
+        /// Validate item
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public bool IsValid(T model)
         {
             return validationFuncs.All(e => e(model));
         }
 
+        /// <summary>
+        /// Add item in repository
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         protected abstract int AddItem(T item);
 
+        /// <summary>
+        /// Return fibonacci sequence to generating Id.
+        /// </summary>
+        /// <returns></returns>
         protected virtual IEnumerable<int> DefaultIdSequence()
         {
             int prev = 1;
@@ -70,13 +114,24 @@ namespace UserStorage.Interfacies
             }
         }
 
+        /// <summary>
+        /// Clone repository
+        /// </summary>
+        /// <returns></returns>
         public abstract Repository<T> Clone();
 
+        /// <summary>
+        /// Clone repository
+        /// </summary>
+        /// <returns></returns>
         object ICloneable.Clone()
         {
             return Clone();
         }
 
+        /// <summary>
+        /// Save state of repository if it possible.
+        /// </summary>
         public abstract void Save();
     }
 }

@@ -21,6 +21,7 @@ namespace WcfService
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class UserService : IUserService
     {
+        //Events that occurs when service perform operation
         public event EventHandler<ServiceEventArgs> Added = (sender, args) => { };
         public event EventHandler<ServiceEventArgs> Deleted = (sender, args) => { };
         public event EventHandler<ServiceSearchEventArgs> Searched = (sender, args) => { };
@@ -36,6 +37,11 @@ namespace WcfService
             this.proxy = proxy;
         }
 
+        /// <summary>
+        /// Add user in service
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public int Add(User item)
         {
             try
@@ -51,6 +57,10 @@ namespace WcfService
             }
         }
 
+        /// <summary>
+        /// Delete user from service
+        /// </summary>
+        /// <param name="item"></param>
         public void Delete(User item)
         {
             try
@@ -64,6 +74,11 @@ namespace WcfService
             }
         }
 
+        /// <summary>
+        /// Search user in service
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
         public IEnumerable<User> Search(UserCriteria criteria)
         {
             try

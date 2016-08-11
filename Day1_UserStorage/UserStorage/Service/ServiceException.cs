@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace UserStorage.Service
 {
+    /// <summary>
+    /// Exception occurs in service
+    /// </summary>
     [Serializable]
     public class ServiceException : Exception
     {

@@ -6,6 +6,11 @@ namespace UserStorage.Extension
 {
     public static class UserCriteriaExtension
     {
+        /// <summary>
+        /// Create delegate from criteria
+        /// </summary>
+        /// <param name="criteria">Criteria to transform</param>
+        /// <returns></returns>
         public static Func<User, bool>CreateFunc(this ICriteria<User> criteria)
         {
             if (criteria == null)

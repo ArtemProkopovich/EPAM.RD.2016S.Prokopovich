@@ -83,24 +83,6 @@ namespace UserStorageTest
         }
 
         [TestMethod]
-        public void GetAll_AddThreeElementsInStorage_ReturnIEnumerableWithThreeElements()
-        {
-            //arrange
-            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
-            ,new User() {Id=2, FirstName = null, LastName = "name2" }
-            ,new User() {Id=3, FirstName = null, LastName = "name3" }};
-            MemoryRepository rep = new MemoryRepository();
-            //act
-            foreach (var u in users)
-            {
-                rep.Add(u);
-            }
-            var results = rep.GetAll();
-            //assert
-            CollectionAssert.AreEqual(users, results.ToArray());
-        }
-
-        [TestMethod]
         public void SearchAll_AddTwoElementsWithLastNameEqualName_SearchThisElements_ReturnIEnumerableWithTwoElements()
         {
             //arrange
@@ -138,41 +120,6 @@ namespace UserStorageTest
             Assert.AreEqual(result.Count(), 0);
         }
 
-        [TestMethod]
-        public void GetById_AddThreeElementsInStorage_GetElementWithIdEqualTwo_ReturnEqualElement()
-        {
-            //arrange
-            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
-            ,new User() {Id=2, FirstName = null, LastName = "name" }
-            ,new User() {Id=3, FirstName = null, LastName = "name" }};
-            MemoryRepository rep = new MemoryRepository();
-            //act
-            foreach (var u in users)
-            {
-                rep.Add(u);
-            }
-            var result = rep.GetById(2);
-            //assert
-            Assert.AreEqual(result, users[1]);
-        }
-
-        [TestMethod]
-        public void GetById_AddThreeElementsInStorage_IdParamNotExistsInStorage_ReturnNull()
-        {
-            //arrange
-            User[] users = new User[] {new User() {Id=1, FirstName = null, LastName = "name1" }
-            ,new User() {Id=2, FirstName = null, LastName = "name" }
-            ,new User() {Id=3, FirstName = null, LastName = "name" }};
-            MemoryRepository rep = new MemoryRepository();
-            //act
-            foreach (var u in users)
-            {
-                rep.Add(u);
-            }
-            var result = rep.GetById(4);
-            //assert
-            Assert.IsNull(result);
-        }
 
         [TestMethod]
         public void Delete_AddElementInStorage_DeleteElementFromStorage_GetElementById_ReturnNull()
@@ -182,9 +129,9 @@ namespace UserStorageTest
             MemoryRepository rep = new MemoryRepository();
             //act
             var result = rep.Add(user);
-            var repUser = rep.GetById(result);
+            var repUser = rep.SearchAll(e => e.Id == result).First();
             rep.Delete(repUser);
-            var resultUser = rep.GetById(result);
+            var resultUser = rep.SearchAll(e => e.Id == result).First();
             //assert
             Assert.IsNull(resultUser);
             

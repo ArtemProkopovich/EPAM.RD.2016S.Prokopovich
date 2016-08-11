@@ -31,7 +31,7 @@ namespace UserStorageTest
         public void LoadToXml_FileWithThreeItems_RepositoryWithThreeItems_Test()
         {
             XmlRepository rep = new XmlRepository("test.xml");
-            Assert.AreEqual(3, rep.GetAll().Count());
+            Assert.AreEqual(3, rep.SearchAll(e => true).Count());
         }
     }
 }

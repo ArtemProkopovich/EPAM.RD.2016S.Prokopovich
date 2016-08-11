@@ -22,6 +22,10 @@ namespace UserStorage.Service
         private readonly ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        /// <summary>
+        /// Create repository with specified repository
+        /// </summary>
+        /// <param name="userRepository">Init repository for service</param>
         public SlaveService(IRepository<User> userRepository)
         {
             if (userRepository == null)
@@ -30,6 +34,11 @@ namespace UserStorage.Service
             Listen();
         }
 
+        /// <summary>
+        /// Create repository with specified repository
+        /// </summary>
+        /// <param name="userRepository">Init repository for service</param>
+        /// <param name="connections">Addresses which the master sends a messages</param>
         public SlaveService(IRepository<User> userRepository, ServiceConnection connection) : this(userRepository)
         {
             if (connection == null)
@@ -37,11 +46,22 @@ namespace UserStorage.Service
             this.connection = connection;
         }
 
+        /// <summary>
+        /// Create repository with specified repository and connections
+        /// </summary>
+        /// <param name="userRepository">Init repository for service</param>
+        /// <param name="connections">Addresses that service listen</param>
+        /// <param name="isLogged">It indicates whether the service log is</param>
         public SlaveService(IRepository<User> userRepository, ServiceConnection connection, bool isLogged) : this(userRepository, connection)
         {
             this.isLogged = isLogged;
         }
 
+        /// <summary>
+        /// Add item in service(not availible)
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public int Add(User item)
         {
             if (isLogged)
@@ -49,6 +69,10 @@ namespace UserStorage.Service
             throw new FeatureNotAvailiableException("Add method not availible for slave service.");
         }
 
+        /// <summary>
+        /// Delete item from service (not availible)
+        /// </summary>
+        /// <param name="item"></param>
         public void Delete(User item)
         {
             if (isLogged)
@@ -56,6 +80,11 @@ namespace UserStorage.Service
             throw new FeatureNotAvailiableException("Delete method not availible for slave service.");
         }
 
+        /// <summary>
+        /// Search items in service
+        /// </summary>
+        /// <param name="searchCriteria"></param>
+        /// <returns></returns>
         public IEnumerable<User> Search(ICriteria<User> searchCriteria)
         {
             try
@@ -78,6 +107,9 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Start listen connection for update data
+        /// </summary>
         protected void Listen()
         {
             ThreadPool.QueueUserWorkItem(async (e) =>
@@ -109,12 +141,21 @@ namespace UserStorage.Service
             });
         }
 
+        /// <summary>
+        /// Get message from stream
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         private Task<ServiceMessage> ReadMessage(Stream stream)
         {
             var serializer = new JsonSerializer();
             return Task.FromResult(serializer.DeserializeObject(stream));
         }
 
+        /// <summary>
+        /// Process message to update data in service
+        /// </summary>
+        /// <param name="message"></param>
         private void ProcessMessage(ServiceMessage message)
         {
             switch (message.Operation)
@@ -128,6 +169,11 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Event occurs when item added
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         protected void OnAdded(object sender, DataUpdatedEventArgs<User> args)
         {
             try
@@ -149,6 +195,12 @@ namespace UserStorage.Service
                 throw new ServiceException("Error in the service", ex);
             }
         }
+
+        /// <summary>
+        /// Event occurs when item deleted
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         protected void OnDeleted(object sender, DataUpdatedEventArgs<User> args)
         {
             try
@@ -171,6 +223,9 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Save state of service(not availible)
+        /// </summary>
         public void Save()
         {
             if (isLogged)

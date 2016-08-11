@@ -2,6 +2,9 @@
 
 namespace UserStorage.Entity
 {
+    /// <summary>
+    /// Criteria for searching user
+    /// </summary>
     public class UserCriteria: ICriteria<User>
     {
         public int? Id { get; set; }

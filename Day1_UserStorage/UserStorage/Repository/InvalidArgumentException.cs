@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace UserStorage.Interfacies
 {
+    /// <summary>
+    /// Exception that occured when object adding in repository is not valid
+    /// </summary>
     [Serializable]
     public class InvalidArgumentException: ArgumentException
     {

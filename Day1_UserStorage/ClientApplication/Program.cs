@@ -4,25 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using UserStorage.Entity;
-using System.ServiceModel;
 
 namespace ClientApplication
 {
     public class Program
     {
-        static volatile Random random = new Random();
         private static readonly int threadsCount = 5;
+        private static volatile Random random = new Random();      
 
         public static void Main(string[] args)
         {
+            ////Wait while server started and release mutex;
             Mutex mutex;
             while (!Mutex.TryOpenExisting("name", out mutex))
                 Thread.Sleep(100);
             mutex.WaitOne();
+
             var service = new ServiceReference.UserServiceClient();
             var cts = new CancellationTokenSource();
             var token = cts.Token;
             var start = new ManualResetEventSlim(false);
+            ////Callback for thread that wile be adding and deleting users from storage; 
             WaitCallback callService = (object state) =>
             {
                 start.Wait();
@@ -64,7 +66,8 @@ namespace ClientApplication
                 }
             };
 
-            WaitCallback searchingService = (object state) =>
+            ////Callback for thread that will be take all users from storage. 
+            WaitCallback searchingService=(object state) =>
             {
                 start.Wait();
                 while (true)
@@ -84,6 +87,8 @@ namespace ClientApplication
                     }
                 }
             };
+
+            ////Start threads
             for (int i = 0; i < threadsCount; i++)
             {
                 if (i == 0)
@@ -101,7 +106,11 @@ namespace ClientApplication
             Console.ReadLine();
         }
 
-
+        /// <summary>
+        /// Outputon the console list of users with previous message;
+        /// </summary>
+        /// <param name="message">Message that will be output before list</param>
+        /// <param name="users">List of users</param>
         private static void PrintUsers(string message, IEnumerable<User> users)
         {
             Console.WriteLine(message);
@@ -113,6 +122,10 @@ namespace ClientApplication
             }
         }
 
+        /// <summary>
+        /// Generate user with random values of properties
+        /// </summary>
+        /// <returns></returns>
         private static User GenerateUser()
         {
             User result = new User();
@@ -124,6 +137,11 @@ namespace ClientApplication
             
         }
 
+        /// <summary>
+        /// Generate string with given length and text and numeric symbols
+        /// </summary>
+        /// <param name="length">Length of string</param>
+        /// <returns></returns>
         private static string GenerateString(int length)
         {
             var alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";

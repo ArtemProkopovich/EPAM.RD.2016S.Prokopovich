@@ -21,12 +21,18 @@ namespace UserStorageConfiguration
         private List<string> Types = new List<string>() { "master", "slave" };
         private BooleanSwitch sw = new BooleanSwitch("logSwitch", "description", "1");
 
+        /// <summary>
+        /// Initialize service proxy
+        /// </summary>
+        /// <returns></returns>
         public ServiceProxy Initialize()
         {
             try
             {
+                ////Check validation of config file
                 if (ValidateConfig())
                 {
+                    ////Create master,slaves in different appdomains
                     var masterRep = GetMasterRepository(GetMasterServiceConfig(), GetFilePathFromConfig());
                     var connections = GetConnectionsFromConfig();
                     var slaves = InitSlaveServices(masterRep, connections);
@@ -45,11 +51,23 @@ namespace UserStorageConfiguration
             }
         }
 
+        /// <summary>
+        /// Create master service with init repsoitory and connections to listen
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="connections"></param>
+        /// <returns></returns>
         private MasterService InitMasterService(IRepository<User> repository, IEnumerable<ServiceConnection> connections)
         {
             return CreateService<MasterService>("MasterDomain", repository, connections);
         }
 
+        /// <summary>
+        /// Init slaves services with init repository and connections to listen
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="connections"></param>
+        /// <returns></returns>
         private IEnumerable<SlaveService> InitSlaveServices(IRepository<User> repository, IEnumerable<ServiceConnection> connections)
         {
             int slaveCount = GetSlavesCount();
@@ -65,6 +83,13 @@ namespace UserStorageConfiguration
             return result;
         }
 
+        /// <summary>
+        /// Create service in appdomain
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="domainName"></param>
+        /// <param name="p"></param>
+        /// <returns></returns>
         private T CreateService<T>(string domainName, params object[] p)
         {
             AppDomain domain = AppDomain.CreateDomain(domainName);
@@ -73,6 +98,10 @@ namespace UserStorageConfiguration
             return (T)loader.LoadFrom(path, typeof(T), p);
         }
 
+        /// <summary>
+        /// Validate config file
+        /// </summary>
+        /// <returns></returns>
         private bool ValidateConfig()
         {
             var serviceConfig = ServiceConfig.GetConfig();
@@ -83,9 +112,9 @@ namespace UserStorageConfiguration
                 if (service is Service)
                 {
                     var s = (Service)service;
-                    if (storageTypes.All(e => e != s.Storage.ToLower()))
+                    if (storageTypes.All(e => e != s.Storage.ToLower())) //Storage type only memory and xml
                         throw new ConfigurationException("Unknown value of storage type attribute");
-                    if (Types.All(e => e != s.Type.ToLower()))
+                    if (Types.All(e => e != s.Type.ToLower())) //Service type only master and slave
                         throw new ConfigurationException("Unknown value of service type attribute");
                     if (s.Type.ToLower() == "slave" && s.Storage.ToLower() != "memory")
                         throw new ConfigurationException("Slave service can have only memory repository");
@@ -119,6 +148,10 @@ namespace UserStorageConfiguration
             return true;
         }
 
+        /// <summary>
+        /// Get count of slaves in config file
+        /// </summary>
+        /// <returns></returns>
         private int GetSlavesCount()
         {
             int result = 0;
@@ -134,7 +167,11 @@ namespace UserStorageConfiguration
             }
             return result;
         }
-            
+        
+        /// <summary>
+        /// Get config of master service
+        /// </summary>
+        /// <returns></returns>
         private Service GetMasterServiceConfig()
         {
             var serviceConfig = ServiceConfig.GetConfig();
@@ -150,6 +187,12 @@ namespace UserStorageConfiguration
             return null;
         }
 
+        /// <summary>
+        /// Init main repository
+        /// </summary>
+        /// <param name="master"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         private IRepository<User> GetMasterRepository(Service master, string filePath)
         {
             IRepository<User> result;
@@ -164,6 +207,10 @@ namespace UserStorageConfiguration
             return result;
         }
 
+        /// <summary>
+        /// Get file path from config file
+        /// </summary>
+        /// <returns></returns>
         private string GetFilePathFromConfig()
         {
             var pathConfig = FilePathConfig.GetConfig();
@@ -174,6 +221,11 @@ namespace UserStorageConfiguration
             return DefaultPath;
         }
 
+
+        /// <summary>
+        /// Get connections from config file
+        /// </summary>
+        /// <returns></returns>
         private IEnumerable<ServiceConnection> GetConnectionsFromConfig()
         {
             var connConfig = ConnectionConfig.GetConfig();

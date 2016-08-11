@@ -3,7 +3,10 @@ using System.Runtime.Serialization;
 using UserStorage.Repository;
 
 namespace UserStorage.Interfacies
-{
+{  
+    /// <summary>
+    /// Exception that occurs when id's sequence ended.
+    /// </summary>
     [Serializable]
     public class EndedIdValuesException : RepositoryException
     {

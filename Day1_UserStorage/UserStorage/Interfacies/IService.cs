@@ -3,6 +3,10 @@
 
 namespace UserStorage.Interfacies
 {
+    /// <summary>
+    /// Interface of service
+    /// </summary>
+    /// <typeparam name="T">Type of objects provided by service</typeparam>
     public interface IService<T>
     {
         int Add(T item);

@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace WcfService
 {
+    /// <summary>
+    /// Exception that occurs in wcf service
+    /// </summary>
     [DataContract]
     public class WcfServiceException
     {

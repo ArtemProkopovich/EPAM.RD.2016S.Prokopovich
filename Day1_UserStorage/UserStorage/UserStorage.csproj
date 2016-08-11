@@ -67,8 +67,6 @@
     <Compile Include="Repository\RepositoryException.cs" />
     <Compile Include="Repository\XmlRepository.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
-    <Compile Include="Serialization\JsonMemberAttribute.cs" />
-    <Compile Include="Serialization\JsonObjectAttribute.cs" />
     <Compile Include="Serialization\JsonSerializer.cs" />
     <Compile Include="Service\DataUpdatedEventArgs.cs" />
     <Compile Include="Service\FeatureNotAvailiableException.cs" />

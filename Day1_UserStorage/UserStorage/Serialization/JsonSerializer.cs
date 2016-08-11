@@ -7,8 +7,16 @@ using UserStorage.Entity;
 
 namespace UserStorage.Serialization
 {
+    /// <summary>
+    /// Implement ISerializer for ServiceMessage
+    /// </summary>
     public class JsonSerializer : ISerializer<ServiceMessage>
     {
+        /// <summary>
+        /// Deserialize object from stream
+        /// </summary>
+        /// <param name="stream">Stream that consists object</param>
+        /// <returns></returns>
         public ServiceMessage DeserializeObject(Stream stream)
         {
             string str = "";
@@ -25,6 +33,11 @@ namespace UserStorage.Serialization
             return result;
         }
 
+        /// <summary>
+        /// Serialize message and write to stream
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="stream"></param>
         public void SerializeObject(ServiceMessage obj, Stream stream)
         {
             byte[] buffer = Encoding.Unicode.GetBytes(WriteMessage(obj));

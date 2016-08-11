@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace UserStorageConfiguration
 {
+    /// <summary>
+    /// Exception occurs in configurator
+    /// </summary>
     [Serializable]
     public class ConfigurationException : Exception
     {

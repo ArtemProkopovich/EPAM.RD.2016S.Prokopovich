@@ -3,6 +3,9 @@ using System.Runtime.Serialization;
 
 namespace UserStorage.Repository
 {
+    /// <summary>
+    /// Exception that occurs in repository
+    /// </summary>
     [Serializable]
     public class RepositoryException : Exception
     {
