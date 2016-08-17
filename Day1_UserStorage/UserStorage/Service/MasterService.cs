@@ -22,7 +22,7 @@ namespace UserStorage.Service
         private readonly IRepository<User> userRepository;
         private readonly bool isLogged = true;
         private readonly ReaderWriterLockSlim slimLock = new ReaderWriterLockSlim();
-        private readonly IEnumerable<ServiceConnection> connections;
+        private readonly IEnumerable<ServiceConnection> connections = new List<ServiceConnection>();
 
         /// <summary>
         /// Create repository with specified repository
@@ -155,7 +155,8 @@ namespace UserStorage.Service
                 try
                 {
                     slimLock.EnterWriteLock();
-                    userRepository.Save();
+                    var tempRep = userRepository as IStatefulRepository<User>;
+                    tempRep?.Save();
                 }
                 finally
                 {

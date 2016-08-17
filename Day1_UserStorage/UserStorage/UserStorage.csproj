@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Entity\UserCriteria.cs" />
     <Compile Include="Extension\UserCriteriaExtension.cs" />
+    <Compile Include="Interfacies\IStatefulRepository.cs" />
     <Compile Include="Net\AsyncTcpClient.cs" />
     <Compile Include="Net\AsyncTcpServer.cs" />
     <Compile Include="Repository\EndedIdValuesException.cs" />

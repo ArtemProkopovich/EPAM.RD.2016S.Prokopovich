@@ -112,6 +112,8 @@ namespace UserStorage.Service
         /// </summary>
         protected void Listen()
         {
+            if (connection == null)
+                return;
             ThreadPool.QueueUserWorkItem(async (e) =>
             {
                 try

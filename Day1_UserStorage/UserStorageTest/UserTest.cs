@@ -68,5 +68,27 @@ namespace UserStorageTest
             ///assert
             Assert.AreNotEqual(result1, result2);
         }
+
+        [TestMethod] 
+        public void Clone_WithUserObject_ReturnEqualCloneObject()
+        {
+            ///arrange
+            User user = new User() { Id = 3, FirstName = "name", LastName = "lname" };
+            ///act
+            var result = user.Clone();
+            ///assert
+            Assert.AreEqual(result, user);
+        }
+
+        [TestMethod]
+        public void ToString_ReturnCorrectString()
+        {
+            ///arrange
+            User user = new User() { Id = 3, FirstName = "name", LastName = "lname" };
+            var expected = "User ID: 3 FirstName: name LastName: lname.";
+            ///act
+            var result = user.ToString();
+            Assert.AreEqual(expected, result);
+        }
     }
 }

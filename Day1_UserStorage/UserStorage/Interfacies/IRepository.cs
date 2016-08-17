@@ -14,6 +14,5 @@ namespace UserStorage.Interfacies
         int Add(T item);
         IEnumerable<T> SearchAll(Func<User, bool> searchCriteria);
         void Delete(T user);
-        void Save();
     }
 }

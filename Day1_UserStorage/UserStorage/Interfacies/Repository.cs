@@ -128,10 +128,5 @@ namespace UserStorage.Interfacies
         {
             return Clone();
         }
-
-        /// <summary>
-        /// Save state of repository if it possible.
-        /// </summary>
-        public abstract void Save();
     }
 }

@@ -82,14 +82,6 @@ namespace UserStorage.Repository
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        public override void Save()
-        {
-            
-        }
-
-        /// <summary>
         /// Search all elements in repository that fir to criteria
         /// </summary>
         /// <param name="searchCriteria"></param>

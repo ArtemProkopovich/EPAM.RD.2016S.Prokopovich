@@ -23,7 +23,7 @@ namespace UserStorageTest
                 new User() { FirstName = "name3" }
             };
             users.ForEach(e => rep.Add(e));
-            rep.SaveToXml();
+            rep.Save();
             Assert.IsTrue(File.Exists("test.xml"));
         }
 
@@ -31,7 +31,13 @@ namespace UserStorageTest
         public void LoadToXml_FileWithThreeItems_RepositoryWithThreeItems_Test()
         {
             XmlRepository rep = new XmlRepository("test.xml");
+            var users = new List<User>() {
+                new User() { FirstName = "name1" },
+                new User() { FirstName = "name2" },
+                new User() { FirstName = "name3" }
+            };
             Assert.AreEqual(3, rep.SearchAll(e => true).Count());
+            CollectionAssert.AreEqual(users, rep.SearchAll(e => true).ToArray());
         }
     }
 }

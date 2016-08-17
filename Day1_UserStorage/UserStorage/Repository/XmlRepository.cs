@@ -8,7 +8,7 @@ using System.IO;
 namespace UserStorage.Repository
 {
     [Serializable]
-    public class XmlRepository : Repository<User>
+    public class XmlRepository : Repository<User>, IStatefulRepository<User>
     {
         private MemoryRepository Repository { get; set; }
         private string FilePath { get; set; }
@@ -80,7 +80,7 @@ namespace UserStorage.Repository
         /// <summary>
         /// Save state of repository to xml file
         /// </summary>
-        public override void Save()
+        public void Save()
         {
             SaveToXml();
         }
@@ -126,7 +126,7 @@ namespace UserStorage.Repository
         /// <summary>
         /// Save state of repository to xml file
         /// </summary>
-        public void SaveToXml()
+        private void SaveToXml()
         {
             FileStream fs = null;
             try
@@ -144,6 +144,5 @@ namespace UserStorage.Repository
                 fs?.Dispose();
             }
         }
-
     }
 }
